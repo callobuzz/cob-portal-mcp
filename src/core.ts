@@ -139,6 +139,12 @@ export class PortalClient {
 			}
 		}
 		if (!res.ok) throw errorFromResponse(res.status, parsed);
+		// A sign-in page or a proxy page instead of the API: say so, never pass null on as data.
+		if (res.redirected || parsed === null || typeof parsed !== "object") {
+			throw new PortalError(
+				`The portal at ${this.config.url} did not answer with API data (it sent a web page). Check COB_PORTAL_URL, and that the portal is up to date.`,
+			);
+		}
 		return parsed;
 	}
 

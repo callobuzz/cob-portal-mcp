@@ -100,6 +100,12 @@ describe("scope filtering", () => {
 });
 
 describe("requests", () => {
+	it("refuses a web page in place of API data, in plain words", async () => {
+		const page = (async () => new Response("<!doctype html><title>Sign in</title>", { status: 200 })) as typeof fetch;
+		const portal = new PortalClient({ url: "https://portal.test", key: KEY, timeoutMs: 5000 }, page);
+		await expect(portal.me()).rejects.toThrow(/did not answer with API data/);
+	});
+
 	it("sends the key only as a bearer header, never in the URL", async () => {
 		const { client, calls } = await connect(["work:read"]);
 		await client.callTool({ name: "list_tasks", arguments: { scope: "team", status: "live", limit: 5 } });
