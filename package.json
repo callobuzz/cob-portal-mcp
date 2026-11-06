@@ -1,0 +1,57 @@
+{
+	"name": "cob-portal-mcp",
+	"version": "0.1.0",
+	"description": "MCP server for the Call O Buzz portal: lets an AI agent read tasks and send drafts and comments with a personal API key",
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"packageManager": "pnpm@10.32.1",
+	"bin": {
+		"cob-portal-mcp": "dist/cli.js"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsup",
+		"test": "vitest run",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"lint": "biome check .",
+		"lint:fix": "biome check --fix .",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"ai-agents",
+		"call-o-buzz",
+		"portal"
+	],
+	"author": "COB (https://github.com/callobuzz)",
+	"license": "UNLICENSED",
+	"private": true,
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.31.0",
+		"zod": "^3.25.76"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.14",
+		"@types/node": "^22.20.4",
+		"tsup": "^8.5.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.11"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
+	}
+}
