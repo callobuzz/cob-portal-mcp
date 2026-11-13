@@ -1,6 +1,6 @@
 {
 	"name": "cob-portal-mcp",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "MCP server for the Call O Buzz portal: lets an AI agent read tasks and send drafts and comments with a personal API key",
 	"type": "module",
 	"engines": {
@@ -22,8 +22,10 @@
 		"test:integration": "vitest run --config vitest.integration.config.ts",
 		"lint": "biome check .",
 		"lint:fix": "biome check --fix .",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"check:dist": "tsup && git diff --exit-code -- dist"
 	},
+	"repository": "github:callobuzz/cob-portal-mcp",
 	"keywords": [
 		"mcp",
 		"model-context-protocol",

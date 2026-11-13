@@ -1,5 +1,5 @@
 node_modules/
-dist/
+# dist/ is committed on purpose: `npx github:callobuzz/cob-portal-mcp` runs dist/cli.js with no build step.
 *.tsbuildinfo
 coverage/
 .DS_Store
