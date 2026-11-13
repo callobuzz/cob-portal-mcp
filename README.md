@@ -87,19 +87,19 @@ At start the server calls `GET /api/v1/me` and offers **only the tools whose sco
 
 ## Tools
 
-| Tool                | Scope          | What it does                                                                                   |
-| ------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| `whoami`            | none           | Shows the person, the key name, its scopes and its end date.                                   |
-| `list_tasks`        | `work:read`    | Lists tasks (`scope` mine or team, `status`, `limit`, `category`, `parent_id` for sub-tasks).  |
-| `get_task`          | `work:read`    | Reads one task with its steps, answers, notes, category, parent and sub-task count.            |
-| `list_templates`    | `work:read`    | Lists the published task templates, with their category.                                       |
-| `list_categories`   | `work:read`    | Lists the task categories the portal offers.                                                   |
-| `get_check_results` | `checks:read`  | Reads the test runs and skips of a check list task. File names only.                           |
-| `add_comment`       | `work:comment` | Writes a note on a task.                                                                       |
-| `draft_tasks`       | `work:draft`   | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).    |
-| `draft_checklist`   | `work:draft`   | Sends a test plan (plan JSON) as one draft with a check list.                                  |
-| `list_drafts`       | `work:draft`   | Lists the draft batches you sent.                                                              |
-| `get_draft`         | `work:draft`   | Reads one draft batch, with the state, category and parent of each draft.                      |
+| Tool                | Scope          | What it does                                                                                  |
+| ------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| `whoami`            | none           | Shows the person, the key name, its scopes and its end date.                                  |
+| `list_tasks`        | `work:read`    | Lists tasks (`scope` mine or team, `status`, `limit`, `category`, `parent_id` for sub-tasks). |
+| `get_task`          | `work:read`    | Reads one task with its steps, answers, notes, category, parent and sub-task count.           |
+| `list_templates`    | `work:read`    | Lists the published task templates, with their category.                                      |
+| `list_categories`   | `work:read`    | Lists the task categories the portal offers.                                                  |
+| `get_check_results` | `checks:read`  | Reads the test runs and skips of a check list task. File names only.                          |
+| `add_comment`       | `work:comment` | Writes a note on a task.                                                                      |
+| `draft_tasks`       | `work:draft`   | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).   |
+| `draft_checklist`   | `work:draft`   | Sends a test plan (plan JSON) as one draft with a check list.                                 |
+| `list_drafts`       | `work:draft`   | Lists the draft batches you sent.                                                             |
+| `get_draft`         | `work:draft`   | Reads one draft batch, with the state, category and parent of each draft.                     |
 
 Every POST carries a new `Idempotency-Key` (a UUID for each tool call), so a repeated call does not make a second draft.
 
