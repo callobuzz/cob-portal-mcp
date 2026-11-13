@@ -1,6 +1,6 @@
 /**
  * Live test against a real portal: `pnpm test:integration`.
- * Skipped unless COB_PORTAL_URL and COB_PORTAL_KEY are set. It only reads (whoami, list_templates).
+ * Skipped unless COB_PORTAL_URL and COB_PORTAL_KEY are set. It only reads (whoami, list_templates, list_categories).
  */
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -33,6 +33,9 @@ describe.skipIf(!live)("live portal", () => {
 			expect(t.isError).toBeFalsy();
 			const body = JSON.parse((t.content as { text: string }[])[0]?.text ?? "{}");
 			expect(Array.isArray(body.templates)).toBe(true);
+			const c = await mcp.callTool({ name: "list_categories", arguments: {} });
+			expect(c.isError).toBeFalsy();
+			expect(Array.isArray(JSON.parse((c.content as { text: string }[])[0]?.text ?? "{}").categories)).toBe(true);
 		} else {
 			expect(names).not.toContain("list_templates");
 		}
