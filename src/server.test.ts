@@ -65,6 +65,7 @@ describe("scope filtering", () => {
 				"list_tasks",
 				"get_task",
 				"list_templates",
+				"list_categories",
 				"get_check_results",
 				"add_comment",
 				"draft_tasks",
@@ -78,7 +79,7 @@ describe("scope filtering", () => {
 	it("hides the tools of a scope the key lacks", async () => {
 		const { client } = await connect(["work:read"]);
 		const names = (await client.listTools()).tools.map((t) => t.name).sort();
-		expect(names).toEqual(["get_task", "list_tasks", "list_templates", "whoami"]);
+		expect(names).toEqual(["get_task", "list_categories", "list_tasks", "list_templates", "whoami"]);
 	});
 
 	it("maps every tool to the documented scope", () => {
@@ -88,6 +89,7 @@ describe("scope filtering", () => {
 			list_tasks: "work:read",
 			get_task: "work:read",
 			list_templates: "work:read",
+			list_categories: "work:read",
 			get_check_results: "checks:read",
 			add_comment: "work:comment",
 			draft_tasks: "work:draft",
@@ -163,6 +165,50 @@ describe("requests", () => {
 		expect((calls[2] as Call).url.pathname).toBe("/api/v1/drafts");
 	});
 
+	it("sends a main task with its sub-tasks (ref, parentRef, category, doneWhen) as one batch", async () => {
+		const { client, calls } = await connect(["work:draft"], () => ({
+			status: 201,
+			json: { batch_id: ID, task_ids: [ID, ID], status: "pending" },
+		}));
+		const tasks = [
+			{
+				ref: "proof",
+				title: "2. Proof assets",
+				category: "Marketing and business growth",
+				notes: "Make the proof a US buyer looks for.",
+				doneWhen: ["Three case studies are live."],
+			},
+			{ parentRef: "proof", title: "Write three case studies", doneWhen: ["Each has three screenshots."] },
+		];
+		const r = await client.callTool({ name: "draft_tasks", arguments: { title: "Growth", tasks } });
+		expect(r.isError).toBeFalsy();
+		expect((calls[0] as Call).body).toEqual({ title: "Growth", tasks });
+		expect(JSON.parse(text(r))).toMatchObject({ batch_id: ID, status: "pending" });
+	});
+
+	it("refuses an unknown field on a draft before any call", async () => {
+		const { client, calls } = await connect(["work:draft"]);
+		const r = await client.callTool({
+			name: "draft_tasks",
+			arguments: { title: "B", tasks: [{ title: "T", assignee: "someone" }] },
+		});
+		expect(r.isError).toBe(true);
+		expect(calls).toHaveLength(0);
+	});
+
+	it("filters list_tasks by category and parent, and lists the categories", async () => {
+		const { client, calls } = await connect(["work:read"]);
+		await client.callTool({
+			name: "list_tasks",
+			arguments: { scope: "team", category: "Marketing and business growth", parent_id: ID },
+		});
+		await client.callTool({ name: "list_categories", arguments: {} });
+		const a = calls[0] as Call;
+		expect(a.url.searchParams.get("category")).toBe("Marketing and business growth");
+		expect(a.url.searchParams.get("parentId")).toBe(ID);
+		expect((calls[1] as Call).url.pathname).toBe("/api/v1/categories");
+	});
+
 	it("rejects an input that is not a uuid before any call", async () => {
 		const { client, calls } = await connect(["work:read"]);
 		const r = await client.callTool({ name: "get_task", arguments: { task_id: "nope" } });
@@ -236,7 +282,7 @@ describe("prompt", () => {
 	it("explains the plan format and the rules", async () => {
 		const { client } = await connect(["work:draft"]);
 		const list = await client.listPrompts();
-		expect(list.prompts.map((p) => p.name)).toEqual(["write_test_plan"]);
+		expect(list.prompts.map((p) => p.name)).toEqual(["write_test_plan", "plan_growth_work"]);
 		const p = await client.getPrompt({ name: "write_test_plan", arguments: { subject: "the login page" } });
 		const t = ((p.messages[0] as { content: unknown }).content as { text: string }).text;
 		for (const word of [
@@ -255,6 +301,31 @@ describe("prompt", () => {
 			expect(t).toContain(word);
 		}
 		expect(t).toContain("the login page");
+	});
+
+	it("explains a main task with sub-tasks in the portal's words", async () => {
+		const { client } = await connect(["work:draft"]);
+		const p = await client.getPrompt({
+			name: "plan_growth_work",
+			arguments: { goal: "win long-term US clients", category: "Sales" },
+		});
+		const t = ((p.messages[0] as { content: unknown }).content as { text: string }).text;
+		for (const word of [
+			"ref",
+			"parentRef",
+			"parentId",
+			"category",
+			"doneWhen",
+			"draft_tasks",
+			"list_categories",
+			"list_tasks",
+		]) {
+			expect(t).toContain(word);
+		}
+		expect(t).toContain("win long-term US clients");
+		expect(t).toContain("Category: Sales");
+		expect(t).toContain("never assigns");
+		expect(t).not.toContain("—");
 	});
 });
 

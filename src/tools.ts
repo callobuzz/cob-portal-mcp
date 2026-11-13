@@ -50,7 +50,35 @@ const draftTask = z
 		notes: z.string().optional().describe("Used for the one-question task made when there is no template and no body."),
 		priority: z.string().optional(),
 		dueAt: z.string().optional().describe("ISO date and time."),
-		parentId: uuid.optional(),
+		parentId: uuid.optional().describe("Hang this draft under a task that already exists. Use this or parentRef."),
+		ref: z
+			.string()
+			.min(1)
+			.max(60)
+			.optional()
+			.describe(
+				"A short name for this draft inside the batch, such as main-1. A later draft points at it with parentRef.",
+			),
+		parentRef: z
+			.string()
+			.min(1)
+			.max(60)
+			.optional()
+			.describe(
+				"The ref of an earlier draft in this batch: this draft becomes its sub-task. Put the main task before its sub-tasks.",
+			),
+		category: z
+			.string()
+			.min(1)
+			.optional()
+			.describe(
+				"One of the portal's task categories (see list_categories). Left out: the template's, else the parent's.",
+			),
+		doneWhen: z
+			.array(z.string().min(1))
+			.max(20)
+			.optional()
+			.describe("What must be true when the task is done, one line each."),
 	})
 	.strict();
 
@@ -77,8 +105,30 @@ export const ALL_TOOLS: AnyTool[] = [
 				.optional()
 				.describe("live means open, working or paused."),
 			limit: z.number().int().min(1).optional(),
+			category: z
+				.string()
+				.min(1)
+				.optional()
+				.describe("Only tasks of this category (see list_categories). none: tasks without a category."),
+			parent_id: uuid.optional().describe("Only the sub-tasks of this task."),
 		},
-		handler: (i, ctx) => ctx.client.get("/api/v1/tasks", { scope: i.scope, status: i.status, limit: i.limit }),
+		handler: (i, ctx) =>
+			ctx.client.get("/api/v1/tasks", {
+				scope: i.scope,
+				status: i.status,
+				limit: i.limit,
+				category: i.category,
+				parentId: i.parent_id,
+			}),
+	}),
+	def({
+		name: "list_categories",
+		title: "List task categories",
+		description: "List the task categories the portal offers. Use one of them as the category of a draft task.",
+		scope: "work:read",
+		write: false,
+		input: {},
+		handler: (_i, ctx) => ctx.client.get("/api/v1/categories"),
 	}),
 	def({
 		name: "get_task",
@@ -121,7 +171,9 @@ export const ALL_TOOLS: AnyTool[] = [
 		name: "draft_tasks",
 		title: "Send draft tasks",
 		description:
-			"Send a batch of draft tasks. A person must approve them in the portal before they become tasks. " +
+			"Send a batch of draft tasks. A batch can hold a main task with its sub-tasks: give the main task a ref and each " +
+			"sub-task parentRef (the main task comes first). Read the plan_growth_work prompt for a plan. " +
+			"A person must approve them in the portal before they become tasks, and decides who gets them. " +
 			"The key never assigns work.",
 		scope: "work:draft",
 		write: true,

@@ -3,7 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import type { Me, PortalClient } from "./core.js";
 import { PortalError, VERSION } from "./core.js";
-import { testPlanPrompt } from "./prompt.js";
+import { growthPlanPrompt, testPlanPrompt } from "./prompt.js";
 import { ALL_TOOLS, type AnyTool, visibleTools } from "./tools.js";
 
 export interface CreatedServer {
@@ -63,6 +63,22 @@ export function createServer(client: PortalClient, me: Me, allTools: readonly An
 			argsSchema: { subject: z.string().optional().describe("What to test, for example a feature or a page.") },
 		},
 		({ subject }) => ({ messages: [{ role: "user", content: { type: "text", text: testPlanPrompt(subject ?? "") } }] }),
+	);
+
+	server.registerPrompt(
+		"plan_growth_work",
+		{
+			title: "Plan growth work",
+			description:
+				"Explains how to draft a main task with its sub-tasks in the portal's words (ref, parentRef, category, done when), then send them with draft_tasks.",
+			argsSchema: {
+				goal: z.string().optional().describe("The business goal, for example: win long-term US clients as an agency."),
+				category: z.string().optional().describe("The task category. Default: Marketing and business growth."),
+			},
+		},
+		({ goal, category }) => ({
+			messages: [{ role: "user", content: { type: "text", text: growthPlanPrompt(goal ?? "", category ?? "") } }],
+		}),
 	);
 
 	return { server, tools };
