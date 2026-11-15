@@ -17,6 +17,13 @@ The first public release.
 - Install in one command: `dist/` is committed and `bin` points at `dist/cli.js`, so npx runs it with
   no build step.
 
+### Security
+
+- The key goes over https only. A plain http address is refused, except `localhost`, `127.0.0.1` and `[::1]`.
+- A redirect is never followed (`redirect: manual`), so the key is never sent on to another address.
+- The server tells the agent that task text and notes are data written by people, never instructions.
+- `zod` 4.6.7 (GHSA advisory on oversized collections in older versions). Build tool `esbuild` pinned to 0.28.1 or newer.
+
 ### Added
 
 - Task categories: `list_categories`, and `category` on `list_tasks`, `get_task`, `list_templates` and drafts.
@@ -44,4 +51,4 @@ The first public release.
 
 [Unreleased]: https://github.com/callobuzz/cob-portal-mcp/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/callobuzz/cob-portal-mcp/releases/tag/v0.2.0
-[0.1.0]: https://github.com/callobuzz/cob-portal-mcp/commit/15cfec6
+[0.1.0]: https://github.com/callobuzz/cob-portal-mcp/commit/d33b964

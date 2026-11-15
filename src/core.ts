@@ -32,7 +32,20 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 		throw new PortalError(
 			"COB_PORTAL_URL is not set. Set it to the portal address, for example https://portal.example.com.",
 		);
-	if (!/^https?:\/\//i.test(url)) throw new PortalError("COB_PORTAL_URL must start with http:// or https://.");
+	let parsedUrl: URL;
+	try {
+		parsedUrl = new URL(url);
+	} catch {
+		throw new PortalError(
+			"COB_PORTAL_URL is not a web address. Use the portal address, for example https://portal.example.com.",
+		);
+	}
+	// The key travels in every request. Plain http would show it to anyone on the network, so it is allowed only for a
+	// portal on this computer (a local test portal).
+	const local = ["localhost", "127.0.0.1", "[::1]"].includes(parsedUrl.hostname);
+	if (parsedUrl.protocol !== "https:" && !(parsedUrl.protocol === "http:" && local)) {
+		throw new PortalError("COB_PORTAL_URL must start with https://. Plain http:// is allowed only for localhost.");
+	}
 	if (!key) {
 		throw new PortalError("COB_PORTAL_KEY is not set. Make a key on the portal Profile page, under API keys.");
 	}
@@ -121,6 +134,8 @@ export class PortalClient {
 				method,
 				headers,
 				body: method === "POST" ? JSON.stringify(body ?? {}) : undefined,
+				// Never follow a redirect: the key would go with the request to wherever it points.
+				redirect: "manual",
 				signal: AbortSignal.timeout(this.config.timeoutMs),
 			});
 		} catch (e) {
@@ -128,6 +143,13 @@ export class PortalClient {
 				throw new PortalError(`The portal did not answer in ${this.config.timeoutMs} ms. Try again.`);
 			}
 			throw new PortalError(`Could not reach the portal at ${this.config.url}. Check COB_PORTAL_URL and the network.`);
+		}
+		// A redirect (a sign-in page, an old address, a proxy) is never API data. With redirect "manual" it arrives as a
+		// 3xx answer, or as an "opaqueredirect" with status 0 in a browser-like fetch.
+		if ((res.status >= 300 && res.status < 400) || res.type === "opaqueredirect") {
+			throw new PortalError(
+				`The portal at ${this.config.url} sent a redirect, not API data, so the call was stopped and the key was not sent on. Check COB_PORTAL_URL: it must be the portal address itself.`,
+			);
 		}
 		const text = await res.text();
 		let parsed: unknown = null;

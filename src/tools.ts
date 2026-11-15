@@ -46,7 +46,10 @@ const draftTask = z
 			.string()
 			.optional()
 			.describe("The key of a published template (see list_templates). Use this or body."),
-		body: z.record(z.unknown()).optional().describe("A template body with steps and endings. Use this or templateKey."),
+		body: z
+			.record(z.string(), z.unknown())
+			.optional()
+			.describe("A template body with steps and endings. Use this or templateKey."),
 		notes: z.string().optional().describe("Used for the one-question task made when there is no template and no body."),
 		priority: z.string().optional(),
 		dueAt: z.string().optional().describe("ISO date and time."),
@@ -194,7 +197,7 @@ export const ALL_TOOLS: AnyTool[] = [
 		write: true,
 		input: {
 			plan: z
-				.union([z.record(z.unknown()), z.string()])
+				.union([z.record(z.string(), z.unknown()), z.string()])
 				.describe(
 					"The plan JSON: { project?, areas: [{ id, name, summary?, cases: [...] }] }. Text of the JSON is also accepted.",
 				),

@@ -26,7 +26,10 @@ permissions) is in scope too: report it the same way. Do not test it against dat
 - Key handling: the key is read from `COB_PORTAL_KEY`, sent only as an `Authorization: Bearer`
   header, and never written to a log, an error message or a URL
 - Tool gating: the server offers only the tools whose scope the key holds (`GET /api/v1/me`)
+- Transport: https only (plain http only for `localhost`); a redirect is never followed, so the key is never sent on
 - Error handling: portal answers that are not API data (a web page, a redirect) give a plain error
+- Prompt injection: task text and notes come from people; the server tells the agent to treat them as data, and every
+  draft still waits for a person
 - Dependency vulnerabilities
 
 ## What a key can and cannot do

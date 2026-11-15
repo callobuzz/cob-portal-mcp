@@ -50,7 +50,7 @@
 	],
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.31.0",
-		"zod": "^3.25.76"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
@@ -60,6 +60,9 @@
 		"vitest": "^4.1.11"
 	},
 	"pnpm": {
+		"overrides": {
+			"esbuild": ">=0.28.1"
+		},
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]

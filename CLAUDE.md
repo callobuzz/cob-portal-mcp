@@ -32,7 +32,7 @@ The portal enforces the same rule on its side (a key never sends mail, approves,
 | `src/prompt.ts`                | The prompts `write_test_plan` and `plan_growth_work`                                                                                                                                                                                                                                                                                                     |
 | `src/cli.ts`                   | Entry: load config, `GET /api/v1/me`, start the stdio server; a bad key stops with the plain message                                                                                                                                                                                                                                                     |
 | `src/index.ts`                 | Library exports                                                                                                                                                                                                                                                                                                                                          |
-| `src/server.test.ts`           | Unit tests with a fake `fetch` (22 tests): method, path, body, headers, scope gating, errors                                                                                                                                                                                                                                                             |
+| `src/server.test.ts`           | Unit tests with a fake `fetch` (24 tests): method, path, body, headers, scope gating, errors                                                                                                                                                                                                                                                             |
 | `src/live.integration.test.ts` | Read-only checks against a real portal; skip unless `COB_PORTAL_URL` and `COB_PORTAL_KEY` are set                                                                                                                                                                                                                                                        |
 
 Tools and scopes: `whoami` (none); `list_tasks`, `get_task`, `list_templates`, `list_categories` (`work:read`);
@@ -106,7 +106,7 @@ Run the server by hand: `node dist/cli.js` with the two variables set. With none
 
 Done in this repo: MIT licence, public README, landing page, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT, CHANGELOG,
 issue and PR templates, CI (Linux and Windows, Node 22 and 24, with `check:dist` and a CLI smoke test), Pages
-workflow, LF line endings. Lint, type check, 22 unit tests and `check:dist` pass. Against the live portal the server
+workflow, LF line endings. Lint, type check, 24 unit tests, `check:dist` and `pnpm audit` (no known vulnerabilities) pass. Against the live portal the server
 starts, calls `/api/v1/me`, and refuses a wrong key with the plain message.
 
 Next, in order:

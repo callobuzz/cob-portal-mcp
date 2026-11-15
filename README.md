@@ -85,7 +85,7 @@ the build tools.
 
 | Variable                | Needed | Meaning                                                                                                                                                |
 | ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `COB_PORTAL_URL`        | yes    | The portal address: `https://portal.callobuzz.com`. No trailing slash.                                                                                 |
+| `COB_PORTAL_URL`        | yes    | The portal address: `https://portal.callobuzz.com`. It must be https; plain http is allowed only for `localhost`.                                      |
 | `COB_PORTAL_KEY`        | yes    | A personal key that starts with `cob_`. The server sends it only as an `Authorization: Bearer` header. It never writes it to a log, an error or a URL. |
 | `COB_PORTAL_TIMEOUT_MS` | no     | How long to wait for one portal answer. Default `30000`. Minimum `1000`.                                                                               |
 
@@ -161,6 +161,10 @@ When the portal refuses a call, the agent gets the portal's error code, its mess
 ## Security model
 
 - **It runs on your computer.** The server is a local program. The agent talks to it over stdio, and it talks to the portal.
+- **The key goes over https only.** A plain http address is refused, except `localhost`. A redirect is never followed, so the
+  key is never sent on to another address.
+- **Portal text is data.** Task text and notes are written by people. The server tells the agent to read them as data, never
+  as instructions. Review what an agent drafts before you approve it.
 - **The key stays in the header.** The server sends the key only as an `Authorization: Bearer` header. It never writes the
   key to a log, an error or a URL.
 - **The key acts as you, cut to its scopes.** A key never has more rights than the person who made it.

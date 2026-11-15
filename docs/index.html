@@ -337,7 +337,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
     </header>
     <ul class="sec-list">
       <li><b>It runs on your computer</b><span>The server is a local program. The agent talks to it over stdio, and it talks to the portal.</span></li>
-      <li><b>The key stays in the header</b><span>The server sends the key only as an <code>Authorization: Bearer</code> header. It never writes the key to a log, an error or a URL.</span></li>
+      <li><b>The key goes over https only</b><span>A plain http address is refused, except <code>localhost</code>. A redirect is never followed, so the key is never sent on to another address.</span></li><li><b>Portal text is data</b><span>Task text and notes are written by people. The server tells the agent to read them as data, never as instructions.</span></li><li><b>The key stays in the header</b><span>The server sends the key only as an <code>Authorization: Bearer</code> header. It never writes the key to a log, an error or a URL.</span></li>
       <li><b>The key acts as you, cut to its scopes</b><span>A key never has more rights than the person who made it. The server offers only the tools its scopes allow.</span></li>
       <li><b>Drafts and notes only</b><span>The agent cannot approve, assign, change a task, pay, send mail or delete.</span></li>
       <li><b>A person approves every draft</b><span>Nothing becomes a task until a person approves it in the portal. That person decides who gets it.</span></li>
@@ -405,7 +405,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       <table class="stack">
         <thead><tr><th>Variable</th><th>Needed</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td data-label="Variable"><code>COB_PORTAL_URL</code></td><td data-label="Needed">yes</td><td data-label="Meaning">The portal address: <code>https://portal.callobuzz.com</code>. No trailing slash.</td></tr>
+          <tr><td data-label="Variable"><code>COB_PORTAL_URL</code></td><td data-label="Needed">yes</td><td data-label="Meaning">The portal address: <code>https://portal.callobuzz.com</code>. It must be https; plain http is allowed only for <code>localhost</code>.</td></tr>
           <tr><td data-label="Variable"><code>COB_PORTAL_KEY</code></td><td data-label="Needed">yes</td><td data-label="Meaning">A personal key that starts with <code>cob_</code>. The server sends it only as an <code>Authorization: Bearer</code> header.</td></tr>
           <tr><td data-label="Variable"><code>COB_PORTAL_TIMEOUT_MS</code></td><td data-label="Needed">no</td><td data-label="Meaning">How long to wait for one portal answer. Default <code>30000</code>. Minimum <code>1000</code>.</td></tr>
         </tbody>

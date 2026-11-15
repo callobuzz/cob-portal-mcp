@@ -350,4 +350,27 @@ describe("config", () => {
 			expect((e as Error).message).not.toContain("wrongkeyvalue");
 		}
 	});
+
+	it("sends the key over https only; plain http only to this computer", () => {
+		expect(() => loadConfig({ COB_PORTAL_URL: "http://portal.example.com", COB_PORTAL_KEY: KEY })).toThrow(/https/);
+		expect(() => loadConfig({ COB_PORTAL_URL: "ftp://portal.example.com", COB_PORTAL_KEY: KEY })).toThrow(/https/);
+		expect(() => loadConfig({ COB_PORTAL_URL: "portal.example.com", COB_PORTAL_KEY: KEY })).toThrow(/web address/);
+		for (const local of ["http://localhost:3500", "http://127.0.0.1:3500", "http://[::1]:3500"]) {
+			expect(loadConfig({ COB_PORTAL_URL: local, COB_PORTAL_KEY: KEY }).url).toBe(local);
+		}
+	});
+});
+
+describe("redirects", () => {
+	it("never follows a redirect, so the key is not sent on, and says so in plain words", async () => {
+		const seen: RequestInit[] = [];
+		const redirect = (async (_u: URL, init: RequestInit) => {
+			seen.push(init);
+			return new Response(null, { status: 302, headers: { Location: "https://elsewhere.example/login" } });
+		}) as unknown as typeof fetch;
+		const portal = new PortalClient({ url: "https://portal.test", key: KEY, timeoutMs: 5000 }, redirect);
+		await expect(portal.me()).rejects.toThrow(/sent a redirect/);
+		expect(seen).toHaveLength(1);
+		expect(seen[0]?.redirect).toBe("manual");
+	});
 });
