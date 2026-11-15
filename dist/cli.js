@@ -5,7 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 // src/core.ts
 import { randomUUID } from "crypto";
-var VERSION = "0.2.0";
+var VERSION = "0.2.1";
 var DEFAULT_TIMEOUT_MS = 3e4;
 var PortalError = class extends Error {
   constructor(message, status) {
@@ -516,6 +516,6 @@ async function main() {
 main().catch((err) => {
   process.stderr.write(`cob-portal-mcp: ${err instanceof Error ? err.message : String(err)}
 `);
-  process.exit(1);
+  process.exitCode = 1;
 });
 //# sourceMappingURL=cli.js.map

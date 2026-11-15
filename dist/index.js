@@ -1,6 +1,6 @@
 // src/core.ts
 import { randomUUID } from "crypto";
-var VERSION = "0.2.0";
+var VERSION = "0.2.1";
 var DEFAULT_TIMEOUT_MS = 3e4;
 var PortalError = class extends Error {
   constructor(message, status) {

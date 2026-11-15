@@ -8,9 +8,10 @@ This file guides Claude Code in this repository. Read it first in every session.
 (Claude Code, Claude Desktop, any MCP client) read tasks and send **drafts** and **notes** to the portal, with a
 personal API key. It runs on the user's computer over stdio and calls the portal's HTTP API.
 
-- Version 0.2.0. Licence MIT, Copyright 2026 Callobuzz. Public repository `callobuzz/cob-portal-mcp` and npm package
-  `cob-portal-mcp` (both to be created by SV, GO-LIVE step 17.2 in the website repo).
-- Install: `npx -y cob-portal-mcp` from npm (pin `cob-portal-mcp@0.2.0`); `npx -y github:callobuzz/cob-portal-mcp`
+- Version 0.2.1. Licence MIT, Copyright 2026 Callobuzz. Public repository `callobuzz/cob-portal-mcp` and npm package
+  `cob-portal-mcp` (0.2.0 published 2026-11-16; 0.2.1 committed and tagged, waiting for SV to push and publish).
+- npm 12 stages a publish: the version waits on npmjs.com, Account settings, Staged Packages, until SV approves it with 2FA.
+- Install: `npx -y cob-portal-mcp` from npm (pin `cob-portal-mcp@0.2.1`); `npx -y github:callobuzz/cob-portal-mcp`
   also works. `dist/` is in the package and committed, and `bin` points at `dist/cli.js`, so npx runs it with no build.
   There is no `prepare` script on purpose.
 - `prepublishOnly` runs lint, type check, tests and `check:dist`, so `npm publish` refuses a stale `dist/`.

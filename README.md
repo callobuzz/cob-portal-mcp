@@ -74,8 +74,8 @@ The portal's Profile page shows this block with your new key and the portal addr
 
 Notes:
 
-- To stay on one version, add it: `cob-portal-mcp@0.2.0`.
-- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.2.0` for one version).
+- To stay on one version, add it: `cob-portal-mcp@0.2.1`.
+- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.2.1` for one version).
 - To use a folder copy, clone the repository and write `node <path>/dist/cli.js` in place of `npx -y ...`. On Windows write
   the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
 

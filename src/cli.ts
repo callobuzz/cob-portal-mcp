@@ -16,5 +16,7 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
 	process.stderr.write(`cob-portal-mcp: ${err instanceof Error ? err.message : String(err)}\n`);
-	process.exit(1);
+	// Not process.exit(): on Windows it can stop Node while the HTTP connection still closes, and Node then crashes
+	// ("Assertion failed ... async.c"). With an exit code set, Node ends by itself once the connection is closed.
+	process.exitCode = 1;
 });

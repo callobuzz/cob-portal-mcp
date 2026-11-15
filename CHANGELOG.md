@@ -6,8 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-16
+
 ### Fixed
 
+- A wrong key or address no longer crashes Node on Windows after the error message ("Assertion failed ... async.c").
+  The server sets the exit code and lets Node close the HTTP connection, in place of `process.exit()`.
 - `dist/cli.js` is stored as executable in git, as the Linux build makes it. CI on Linux failed on that mode alone.
 
 ## [0.2.0] - 2026-11-15
@@ -54,6 +58,7 @@ The first public release.
 
 - A web page in place of API data (a wrong address, a sign-in redirect) gives a plain error, not a crash.
 
-[Unreleased]: https://github.com/callobuzz/cob-portal-mcp/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/callobuzz/cob-portal-mcp/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/callobuzz/cob-portal-mcp/releases/tag/v0.2.1
 [0.2.0]: https://github.com/callobuzz/cob-portal-mcp/releases/tag/v0.2.0
 [0.1.0]: https://github.com/callobuzz/cob-portal-mcp/commit/d33b964
