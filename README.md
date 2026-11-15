@@ -1,6 +1,10 @@
 # cob-portal-mcp
 
-**[Website](https://callobuzz.github.io/cob-portal-mcp)** · **[Call O Buzz portal](https://portal.callobuzz.com)** · **[Callobuzz open source](https://callobuzz.com/open-source)** · **[Changelog](./CHANGELOG.md)**
+> [!TIP]
+> **[Open the cob-portal-mcp guide page →](https://callobuzz.github.io/cob-portal-mcp)**
+> Install, the safety model, every tool, the key scopes and the FAQ, on one page.
+
+**[npm](https://www.npmjs.com/package/cob-portal-mcp)** · **[Releases](https://github.com/callobuzz/cob-portal-mcp/releases)** · **[Changelog](./CHANGELOG.md)** · **[Callobuzz open source](https://callobuzz.com/open-source)**
 
 [![build](https://img.shields.io/github/actions/workflow/status/callobuzz/cob-portal-mcp/ci.yml?branch=main)](https://github.com/callobuzz/cob-portal-mcp/actions)
 [![release](https://img.shields.io/github/v/release/callobuzz/cob-portal-mcp?color=blue)](https://github.com/callobuzz/cob-portal-mcp/releases)
@@ -32,7 +36,7 @@ server connects the two, and keeps a person in charge:
 ## Prerequisites
 
 - **Node.js 22 or newer.**
-- **A portal account** with two-step sign-in (2FA) on, at [portal.callobuzz.com](https://portal.callobuzz.com).
+- **A portal account** with two-step sign-in (2FA) on.
 - **A personal API key** from the portal (see [Make a key](#make-a-key)).
 
 ## Install in one command
@@ -44,7 +48,7 @@ server connects the two, and keeps a person in charge:
 
 ```bash
 claude mcp add cob-portal \
-  --env COB_PORTAL_URL=https://portal.callobuzz.com \
+  --env COB_PORTAL_URL=https://your-portal-address \
   --env COB_PORTAL_KEY=cob_your_key_here \
   -- npx -y cob-portal-mcp
 ```
@@ -60,7 +64,7 @@ Add this to `claude_desktop_config.json`, then restart Claude Desktop:
 			"command": "npx",
 			"args": ["-y", "cob-portal-mcp"],
 			"env": {
-				"COB_PORTAL_URL": "https://portal.callobuzz.com",
+				"COB_PORTAL_URL": "https://your-portal-address",
 				"COB_PORTAL_KEY": "cob_your_key_here"
 			}
 		}
@@ -87,7 +91,7 @@ points at `dist/cli.js`. npx installs the two runtime packages (`@modelcontextpr
 
 | Variable                | Needed | Meaning                                                                                                                                                |
 | ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `COB_PORTAL_URL`        | yes    | The portal address: `https://portal.callobuzz.com`. It must be https; plain http is allowed only for `localhost`.                                      |
+| `COB_PORTAL_URL`        | yes    | The portal address, as the Profile page shows it. It must be https; plain http is allowed only for `localhost`.                                        |
 | `COB_PORTAL_KEY`        | yes    | A personal key that starts with `cob_`. The server sends it only as an `Authorization: Bearer` header. It never writes it to a log, an error or a URL. |
 | `COB_PORTAL_TIMEOUT_MS` | no     | How long to wait for one portal answer. Default `30000`. Minimum `1000`.                                                                               |
 
@@ -187,7 +191,11 @@ pnpm check:dist    # builds and fails when dist/ differs from the commit
 COB_PORTAL_URL=... COB_PORTAL_KEY=... pnpm test:integration   # real portal, read-only; skips when unset
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+### Contributions
+
+Code contributions are by invitation only, because the server follows one private portal. Bug reports are welcome as
+[issues](https://github.com/callobuzz/cob-portal-mcp/issues). Report a security problem in private, as
+[SECURITY.md](./SECURITY.md) says.
 
 ### Release
 

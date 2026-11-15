@@ -17,7 +17,7 @@ or email callobuzz@gmail.com.
 You should receive an initial response within 48 hours. We will work with you to understand the
 issue and coordinate a fix before any public disclosure.
 
-A problem in the portal itself (the API at `https://portal.callobuzz.com/api/v1`, sign-in, keys or
+A problem in the portal itself (its API under `/api/v1`, sign-in, keys or
 permissions) is in scope too: report it the same way. Do not test it against data that is not yours.
 
 ## Scope

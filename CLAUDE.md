@@ -4,7 +4,7 @@ This file guides Claude Code in this repository. Read it first in every session.
 
 ## What this is
 
-**cob-portal-mcp**: the MCP server for the Call O Buzz portal (`https://portal.callobuzz.com`). It lets an AI agent
+**cob-portal-mcp**: the MCP server for the Call O Buzz portal. It lets an AI agent
 (Claude Code, Claude Desktop, any MCP client) read tasks and send **drafts** and **notes** to the portal, with a
 personal API key. It runs on the user's computer over stdio and calls the portal's HTTP API.
 
@@ -16,7 +16,10 @@ personal API key. It runs on the user's computer over stdio and calls the portal
   There is no `prepare` script on purpose.
 - `prepublishOnly` runs lint, type check, tests and `check:dist`, so `npm publish` refuses a stale `dist/`.
 - User docs: `README.md`. Landing page: `docs/index.html` (GitHub Pages, `.github/workflows/pages.yml`).
-  History: `CHANGELOG.md` (Keep a Changelog). Policy: `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`.
+  History: `CHANGELOG.md` (Keep a Changelog). Policy: `SECURITY.md`, `CODE_OF_CONDUCT.md`.
+- SV's rules for the public material: never link or name the portal address (examples use `https://your-portal-address`;
+  the portal's "Copy MCP setup" fills the real one). Code contributions are by invitation only: no CONTRIBUTING file and
+  no pull request template. Bug reports as issues are fine.
 
 ## The one safety rule
 
@@ -56,7 +59,7 @@ there as `mcp/cob-portal-mcp` (a junction to this folder). Read the portal code 
 | Settings for the install line and guide link     | `src/lib/settings/lanes/growth-mcp.ts`: `api.mcp_package` (default `github:callobuzz/cob-portal-mcp`), `api.mcp_guide_url` (default the README on GitHub)           |
 | Tests                                            | `tests/integration/api-v1.test.ts`, `tests/integration/api-keys.test.ts`, `tests/e2e/api-v1.spec.ts`                                                                |
 
-The live description is public: `https://portal.callobuzz.com/api/v1/openapi.json`. It is the source of truth. Never
+The live description is at `<portal address>/api/v1/openapi.json`. It is the source of truth. Never
 call a route or send a field that is not in it. A new portal route is added in the portal repo first, with its test,
 then here.
 
@@ -71,7 +74,7 @@ pnpm typecheck       # tsc
 pnpm test            # unit tests, fake fetch
 pnpm build           # tsup -> dist/
 pnpm check:dist      # builds and fails when dist/ differs from the commit
-COB_PORTAL_URL=https://portal.callobuzz.com COB_PORTAL_KEY=cob_... pnpm test:integration   # read-only, live
+COB_PORTAL_URL=<portal address> COB_PORTAL_KEY=cob_... pnpm test:integration   # read-only, live
 ```
 
 Run the server by hand: `node dist/cli.js` with the two variables set. With none set it stops at once with
@@ -108,8 +111,8 @@ Run the server by hand: `node dist/cli.js` with the two variables set. With none
 
 ## State on 2026-11-15, and what is next
 
-Done in this repo: MIT licence, public README, landing page, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT, CHANGELOG,
-issue and PR templates, CI (Linux and Windows, Node 22 and 24, with `check:dist` and a CLI smoke test), Pages
+Done in this repo: MIT licence, public README, landing page, SECURITY, CODE_OF_CONDUCT, CHANGELOG,
+issue templates, CI (Linux and Windows, Node 22 and 24, with `check:dist` and a CLI smoke test), Pages
 workflow, LF line endings. Lint, type check, 24 unit tests, `check:dist` and `pnpm audit` (no known vulnerabilities) pass. Against the live portal the server
 starts, calls `/api/v1/me`, and refuses a wrong key with the plain message.
 

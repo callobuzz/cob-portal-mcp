@@ -285,7 +285,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
     <div>
       <div class="eyebrow">MCP server · for the Call O Buzz portal · MIT</div>
       <h1>Let your agent draft the work. <span class="thin">A person approves it.</span></h1>
-      <p class="lede">cob-portal-mcp is an MCP server for the <a href="https://portal.callobuzz.com">Call O Buzz portal</a>. An AI agent reads tasks and sends drafts and notes. It cannot assign, approve, pay, send mail or delete. It runs on your computer with a personal API key.</p>
+      <p class="lede">cob-portal-mcp is an MCP server for the Call O Buzz portal. An AI agent reads tasks and sends drafts and notes. It cannot assign, approve, pay, send mail or delete. It runs on your computer with a personal API key.</p>
       <div class="cmdbox">
         <pre id="install-cmd" tabindex="0" aria-label="Install command"><span class="k">npx</span> -y cob-portal-mcp</pre>
         <button class="copy" type="button" data-copy="npx -y cob-portal-mcp" aria-label="Copy the install command">Copy</button>
@@ -293,9 +293,9 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       <div class="cta">
         <a class="btn btn-primary" href="https://github.com/callobuzz/cob-portal-mcp">View on GitHub</a>
         <a class="btn btn-ghost" href="https://www.npmjs.com/package/cob-portal-mcp">View on npm</a>
-        <a class="btn btn-ghost" href="https://portal.callobuzz.com">Open the portal</a>
+        <a class="btn btn-ghost" href="https://callobuzz.com/open-source">Callobuzz open source</a>
       </div>
-      <ul class="chips pill-row" aria-label="At a glance">
+      <ul class="chips" aria-label="At a glance">
         <li class="chip">Node.js 22+</li>
         <li class="chip">Drafts and notes only</li>
         <li class="chip">Scoped by the key</li>
@@ -357,7 +357,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
     <ol class="steps">
       <li>
         <h3>Make a key</h3>
-        <p>Sign in to the <a href="https://portal.callobuzz.com">portal</a> with two-step sign-in (2FA) on. Open <b>Profile</b>, then <b>API keys</b>. Choose the scopes and how long the key lasts. Copy it at once. The portal shows it one time.</p>
+        <p>Sign in to the portal with two-step sign-in (2FA) on. Open <b>Profile</b>, then <b>API keys</b>. Choose the scopes and how long the key lasts. Copy it at once. The portal shows it one time.</p>
       </li>
       <li>
         <h3>Add the server</h3>
@@ -372,7 +372,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       <div class="snip">
         <div class="label"><h3>Claude Code</h3><span class="where">terminal</span></div>
 <pre tabindex="0"><span class="k">claude</span> mcp add cob-portal \
-  --env COB_PORTAL_URL=https://portal.callobuzz.com \
+  --env COB_PORTAL_URL=https://your-portal-address \
   --env COB_PORTAL_KEY=cob_your_key_here \
   -- npx -y cob-portal-mcp</pre>
         <p>To stay on one version, write <code>cob-portal-mcp@0.2.1</code>. To run it straight from GitHub, write <code>github:callobuzz/cob-portal-mcp</code>.</p>
@@ -385,7 +385,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       "command": "npx",
       "args": ["-y", "cob-portal-mcp"],
       "env": {
-        "COB_PORTAL_URL": "https://portal.callobuzz.com",
+        "COB_PORTAL_URL": "https://your-portal-address",
         "COB_PORTAL_KEY": "cob_your_key_here"
       }
     }
@@ -406,7 +406,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       <table class="stack">
         <thead><tr><th>Variable</th><th>Needed</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td data-label="Variable"><code>COB_PORTAL_URL</code></td><td data-label="Needed">yes</td><td data-label="Meaning">The portal address: <code>https://portal.callobuzz.com</code>. It must be https; plain http is allowed only for <code>localhost</code>.</td></tr>
+          <tr><td data-label="Variable"><code>COB_PORTAL_URL</code></td><td data-label="Needed">yes</td><td data-label="Meaning">The portal address, as the Profile page shows it. It must be https; plain http is allowed only for <code>localhost</code>.</td></tr>
           <tr><td data-label="Variable"><code>COB_PORTAL_KEY</code></td><td data-label="Needed">yes</td><td data-label="Meaning">A personal key that starts with <code>cob_</code>. The server sends it only as an <code>Authorization: Bearer</code> header.</td></tr>
           <tr><td data-label="Variable"><code>COB_PORTAL_TIMEOUT_MS</code></td><td data-label="Needed">no</td><td data-label="Meaning">How long to wait for one portal answer. Default <code>30000</code>. Minimum <code>1000</code>.</td></tr>
         </tbody>
@@ -545,20 +545,19 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
     <div class="final">
       <div class="kicker">Open source · MIT</div>
       <h2>Agents draft. <span class="thin">People approve.</span></h2>
-      <p class="sub">MIT licence. Copyright 2026 Callobuzz. Built by <a href="https://callobuzz.com">Call O Buzz Services</a>. The portal is at <a href="https://portal.callobuzz.com">portal.callobuzz.com</a>.</p>
+      <p class="sub">MIT licence. Copyright 2026 Callobuzz. Built by <a href="https://callobuzz.com">Call O Buzz Services</a>.</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://github.com/callobuzz/cob-portal-mcp">Star on GitHub</a>
-        <a class="btn btn-ghost" href="https://portal.callobuzz.com">Open the portal</a>
+        <a class="btn btn-ghost" href="https://callobuzz.com/open-source">More Callobuzz open source</a>
       </div>
     </div>
     <div class="foot-meta">
       <div><a href="https://callobuzz.com">Callobuzz</a> · MIT</div>
       <div class="foot-links">
         <a href="https://github.com/callobuzz/cob-portal-mcp">GitHub</a>
-        <a href="https://portal.callobuzz.com">Portal</a>
+        <a href="https://www.npmjs.com/package/cob-portal-mcp">npm</a>
         <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/LICENSE">Licence</a>
         <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/CHANGELOG.md">Changelog</a>
-        <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/CONTRIBUTING.md">Contributing</a>
         <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">Security</a>
       </div>
     </div>

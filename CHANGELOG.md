@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The README, the landing page and the release notes no longer name or link the portal address. Setup examples use
+  `https://your-portal-address`; the portal's "Copy MCP setup" fills in the real one.
+- The README opens with a link to the guide page.
+
+### Removed
+
+- `CONTRIBUTING.md` and the pull request template. Code contributions are by invitation only. Bug reports stay open as
+  issues.
+
 ## [0.2.1] - 2026-11-16
 
 ### Fixed
