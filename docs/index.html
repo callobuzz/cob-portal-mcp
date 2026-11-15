@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://callobuzz.github.io/cob-portal-mcp/">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233B82F6'/%3E%3Cpath d='M9 11h14M9 16h9M9 21h6' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 28 10v12L16 29 4 22V10z' fill='none' stroke='%2322d3ee' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2322d3ee'/%3E%3C/svg%3E">
 <style>
 /* Tokens. Dark is the Callobuzz theme; light follows the reader's system. Spacing is a 4/8 scale; one radius family. */
 :root{
@@ -57,17 +57,25 @@ code{font-size: .9em; overflow-wrap: anywhere;}
 .bar .wrap{display: flex; align-items: center; gap: var(--s5); height: 56px;}
 .brand{display: inline-flex; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 650; text-decoration: none; white-space: nowrap;}
 .brand svg{width: 24px; height: 24px; flex: none;}
-.bar nav{display: flex; gap: var(--s1); margin-left: auto; overflow-x: auto; scrollbar-width: none;}
+/* The section menu sits in one capsule; the section in view is lit. */
+.bar nav{display: flex; gap: 2px; margin-left: auto; padding: var(--s1); border: 1px solid var(--line); border-radius: 999px; background: var(--surface); overflow-x: auto; scrollbar-width: none;}
 .bar nav::-webkit-scrollbar{display: none;}
-.bar nav a{color: var(--ink-2); text-decoration: none; font-size: 14px; padding: var(--s2) var(--s3); border-radius: var(--r-ctl); white-space: nowrap;}
+.bar nav a{color: var(--ink-2); text-decoration: none; font-size: 13.5px; padding: 6px var(--s3); border-radius: 999px; white-space: nowrap;}
 .bar nav a:hover{color: var(--ink); background: var(--bg-2);}
-.bar nav a[aria-current="true"]{color: var(--ink); background: var(--bg-2);}
+.bar nav a[aria-current="true"]{color: var(--ink); background: color-mix(in srgb, var(--brand) 22%, var(--surface));}
 .bar .ext{display: flex; gap: var(--s4); font-size: 14px; white-space: nowrap;}
 .bar .ext a{color: var(--ink); font-weight: 600; text-decoration: none;}
 .bar .ext a:hover{color: var(--brand);}
 
 /* Hero: the promise on the left, the actual setup on the right. */
-.hero{padding: var(--s8) 0 var(--s7);}
+/* A soft glow gives the hero and the closing block depth without boxes. */
+.hero{position: relative; isolation: isolate; padding: var(--s8) 0 var(--s7);}
+.hero::before, .closing::before{content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;}
+.hero::before{background: radial-gradient(40% 60% at 78% 30%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%), radial-gradient(30% 45% at 8% 0%, color-mix(in srgb, var(--brand) 10%, transparent), transparent 70%);}
+/* The mark: the product's sign beside the title, with its own glow. */
+.mark{width: 72px; height: 72px; margin-bottom: var(--s5); position: relative;}
+.mark::before{content: ""; position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 28%, transparent), transparent 72%); z-index: -1;}
+.mark svg{width: 100%; height: 100%;}
 /* Laptop: the promise and its proof on the left, the setup on the right. Phone: promise, setup, then proof. */
 .hero .wrap{display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-areas: "intro setup" "proof setup"; grid-template-rows: auto 1fr; column-gap: var(--s7); align-items: start;}
 .intro{grid-area: intro;} .proof{grid-area: proof;} .setup{grid-area: setup;}
@@ -102,8 +110,22 @@ html:not(.js) .panel + .panel{margin-top: var(--s3);}
 .copy:hover{background: rgba(255,255,255,.1);}
 html:not(.js) .copy{visibility: hidden;}
 
-/* Sections: space separates, not boxes. */
+/* Sections in alternating bands; tables and lists sit in one framed panel each. */
 section{padding: var(--s8) 0; border-top: 1px solid var(--line);}
+section.band{background: var(--bg-2);}
+.panel-box{background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s2) var(--s5);}
+.panel-box table th{padding-top: var(--s4);}
+.panel-box table tr:last-child td{border-bottom: 0;}
+.split .panel-box{padding-top: var(--s4);}
+.split .panel-box li:last-child{border-bottom: 0;}
+.band .callout{background: var(--surface); border: 1px solid var(--line);}
+
+/* The flow: read, draft, approve. */
+.flow{display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); margin: 0 0 var(--s6); padding: 0; list-style: none; counter-reset: flow;}
+.flow li{counter-increment: flow; padding: var(--s5); border-radius: var(--r-card); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));}
+.flow li::before{content: counter(flow); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--ink); font-weight: 650; font-size: 14px; margin-bottom: var(--s3);}
+.flow h3{font-size: 17px; font-weight: 650;}
+.flow p{margin-top: var(--s1); color: var(--ink-2); font-size: 15px;}
 .head{max-width: 64ch; margin-bottom: var(--s6);}
 h2{font-size: 28px; font-weight: 700; letter-spacing: -.015em;}
 .head p{margin-top: var(--s3); color: var(--ink-2);}
@@ -153,6 +175,16 @@ dd{margin: var(--s1) 0 0; color: var(--ink-2); font-size: 15px;}
 .faq details[open] summary::after{content: "\2212";}
 .faq p{color: var(--ink-2); padding: 0 0 var(--s4); max-width: 72ch;}
 
+/* Closing block: one line of purpose and the two places to go next. */
+.closing{position: relative; isolation: isolate; overflow: hidden; border-top: 1px solid var(--line); padding: var(--s8) 0;}
+.closing::before{background: radial-gradient(45% 80% at 15% 100%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);}
+.closing h2{max-width: 22ch;}
+.closing p{margin-top: var(--s3); color: var(--ink-2); max-width: 56ch;}
+.btns{display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s5);}
+.btn{display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s5); border-radius: var(--r-ctl); font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--line-2); color: var(--ink);}
+.btn:hover{background: var(--bg-2);}
+.btn.primary{background: var(--brand); border-color: var(--brand); color: var(--brand-ink);}
+.btn.primary:hover{background: color-mix(in srgb, var(--brand) 85%, black);}
 footer{border-top: 1px solid var(--line); padding: var(--s6) 0 var(--s7); color: var(--ink-3); font-size: 14px;}
 footer .wrap{display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s3) var(--s5);}
 footer nav{display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5);}
@@ -161,7 +193,8 @@ footer a{color: var(--ink-2);}
 @media (max-width: 900px){
   .bar .ext{display: none;}
   .hero{padding-top: var(--s6);}
-  .split, .ref, .facts-grid{grid-template-columns: minmax(0, 1fr);}
+  .split, .ref, .facts-grid, .flow{grid-template-columns: minmax(0, 1fr);}
+  .panel-box{padding: var(--s1) var(--s4);}
   .hero .wrap{grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "setup" "proof"; grid-template-rows: none; row-gap: var(--s6);}
   .hero .facts{margin-top: 0;}
   section{padding: var(--s7) 0;}
@@ -193,7 +226,7 @@ footer a{color: var(--ink-2);}
 <header class="bar">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="cob-portal-mcp, top of the page">
-      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#3B82F6"/><path d="M9 11h14M9 16h9M9 21h6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="#22D3EE"/></svg>
       cob-portal-mcp
     </a>
     <nav aria-label="Sections">
@@ -215,6 +248,7 @@ footer a{color: var(--ink-2);}
 <div class="hero">
   <div class="wrap">
     <div class="intro">
+      <div class="mark" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false"><path d="M100 18 172 60v80l-72 42-72-42V60z" fill="none" stroke="#22D3EE" stroke-width="12" stroke-linejoin="round"/><path d="M100 56 140 79v42l-40 23-40-23V79z" fill="none" stroke="#3B82F6" stroke-width="8" stroke-linejoin="round"/><circle cx="100" cy="100" r="17" fill="#22D3EE"/></svg></div>
       <h1>Connect your AI agent to the Call&nbsp;O&nbsp;Buzz portal</h1>
       <p class="lead">Your agent reads the team's tasks and drafts new ones. Nothing becomes real work until a person approves it in the portal.</p>
     </div>
@@ -267,14 +301,28 @@ footer a{color: var(--ink-2);}
   </div>
 </div>
 
-<section id="limits" aria-labelledby="limits-title">
+<section id="how" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="head">
+      <h2 id="how-title">How it works</h2>
+      <p>A good agent can plan work, write a test plan or break a goal into tasks. The portal is where the team tracks that work. This server connects the two and keeps a person in charge.</p>
+    </div>
+    <ol class="flow">
+      <li><h3>The agent reads</h3><p>It lists tasks, templates and categories, and reads one task with its steps, answers and notes.</p></li>
+      <li><h3>The agent drafts</h3><p>It sends draft tasks, a main task with sub-tasks, or a test plan as a check list. It can also leave a note.</p></li>
+      <li><h3>A person approves</h3><p>The drafts wait in the portal. A person approves or rejects each one and chooses who gets the task.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="limits" class="band" aria-labelledby="limits-title">
   <div class="wrap">
     <div class="head">
       <h2 id="limits-title">What the agent can and cannot do</h2>
       <p>The server offers only these actions. The portal checks every one again, so a changed server cannot do more.</p>
     </div>
     <div class="split">
-      <div>
+      <div class="panel-box">
         <h3><span class="dot ok" aria-hidden="true"></span>It can</h3>
         <ul>
           <li><span>Read tasks, with their steps, answers and notes</span><code>work:read</code></li>
@@ -285,7 +333,7 @@ footer a{color: var(--ink-2);}
           <li><span>Write a note on a task, marked as written through the key</span><code>work:comment</code></li>
         </ul>
       </div>
-      <div>
+      <div class="panel-box">
         <h3><span class="dot no" aria-hidden="true"></span>It cannot</h3>
         <ul>
           <li><span>Approve a draft, its own or anyone's</span></li>
@@ -307,7 +355,7 @@ footer a{color: var(--ink-2);}
       <h2 id="scopes-title">Pick the scopes for the job</h2>
       <p>A key acts as you, cut down to the scopes you tick. It never has more rights than you. Tick the fewest that do the job.</p>
     </div>
-    <div class="table">
+    <div class="table panel-box">
       <table>
         <thead><tr><th scope="col">You want the agent to</th><th scope="col">Tick</th><th scope="col">Tools it gets</th></tr></thead>
         <tbody>
@@ -323,7 +371,7 @@ footer a{color: var(--ink-2);}
   </div>
 </section>
 
-<section id="protect" aria-labelledby="protect-title">
+<section id="protect" class="band" aria-labelledby="protect-title">
   <div class="wrap">
     <div class="head">
       <h2 id="protect-title">How your key is protected</h2>
@@ -346,7 +394,7 @@ footer a{color: var(--ink-2);}
       <h2 id="tools-title">The eleven tools</h2>
       <p>Tools marked <span class="tag" style="margin-left:0">writes</span> send something to the portal. The rest only read.</p>
     </div>
-    <div class="table">
+    <div class="table panel-box">
       <table>
         <thead><tr><th scope="col">Tool</th><th scope="col">Scope</th><th scope="col">What it does</th></tr></thead>
         <tbody>
@@ -367,7 +415,7 @@ footer a{color: var(--ink-2);}
   </div>
 </section>
 
-<section id="more" aria-labelledby="more-title">
+<section id="more" class="band" aria-labelledby="more-title">
   <div class="wrap">
     <div class="head">
       <h2 id="more-title">Reference</h2>
@@ -430,6 +478,16 @@ footer a{color: var(--ink-2);}
     </div>
   </div>
 </section>
+<div class="closing">
+  <div class="wrap">
+    <h2>Let your agent draft the work. A person approves it.</h2>
+    <p>Open source under the MIT licence, built by Call O Buzz Services for its own portal.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/callobuzz/cob-portal-mcp">See the code on GitHub</a>
+      <a class="btn" href="https://callobuzz.com/open-source">More Callobuzz open source</a>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer>
