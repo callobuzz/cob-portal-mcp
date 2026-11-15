@@ -3,538 +3,430 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>cob-portal-mcp: the MCP server for the Call O Buzz portal</title>
-<meta name="description" content="An MCP server for the Call O Buzz portal. An AI agent reads tasks and sends drafts and notes. A person approves every draft in the portal. Works with Claude Code, Claude Desktop and any MCP client.">
-<meta name="theme-color" content="#06060C">
+<title>cob-portal-mcp: connect your AI agent to the Call O Buzz portal</title>
+<meta name="description" content="An MCP server for the Call O Buzz portal. Your AI agent reads tasks and sends drafts and notes. A person approves every draft. Works with Claude Code, Claude Desktop and any MCP client.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0B0F14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://callobuzz.github.io/cob-portal-mcp/">
-<meta property="og:title" content="cob-portal-mcp: the MCP server for the Call O Buzz portal">
-<meta property="og:description" content="An AI agent reads tasks and sends drafts and notes. A person approves every draft in the portal.">
+<meta property="og:title" content="cob-portal-mcp: connect your AI agent to the Call O Buzz portal">
+<meta property="og:description" content="Your agent reads tasks and sends drafts and notes. A person approves every draft.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://callobuzz.github.io/cob-portal-mcp/">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 28 10v12L16 29 4 22V10z' fill='none' stroke='%2322d3ee' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2322d3ee'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233B82F6'/%3E%3Cpath d='M9 11h14M9 16h9M9 21h6' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
+/* Tokens. Dark is the Callobuzz theme; light follows the reader's system. Spacing is a 4/8 scale; one radius family. */
 :root{
-  --color-paper: oklch(12.6% 0.015 284);
-  --color-surface: oklch(33.5% 0.055 219.5);
-  --color-primary: oklch(71.5% 0.126 215);
-  --color-primary-ink: oklch(12.6% 0.015 284);
-  --color-ink: oklch(98.6% 0.004 215);
-  --color-ink-2: oklch(71.2% 0.013 286);
-  --color-rule: oklch(27.4% 0.005 286);
-  --color-paper-2: oklch(14.6% 0.018 250);
-  --color-panel: oklch(17.2% 0.022 232);
-  --color-panel-2: oklch(20.5% 0.03 226);
-  --color-rule-strong: oklch(37% 0.012 286);
-  --color-ink-3: oklch(64% 0.013 286);
-  --color-ink-on-surface: oklch(84% 0.02 215);
-  --color-term: oklch(10.5% 0.014 262);
-  --color-term-ink: oklch(90% 0.02 240);
-  --color-term-comment: oklch(62% 0.03 250);
-  --color-focus: oklch(78% 0.13 210);
-  --color-amber: oklch(80.8% 0.145 79);
-  --color-green: oklch(80.6% 0.158 160);
-
-  --font-display: "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-
-  --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px;
-  --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 80px;
-  --radius-card: 16px; --radius-control: 8px; --radius-pill: 9999px;
-  --page-max: 1200px; --gutter: clamp(16px, 4vw, 32px);
-  --text-display: clamp(2.25rem, 3.6vw + 1rem, 4rem);
-  --text-h2: clamp(1.75rem, 2.2vw + 1rem, 2.875rem);
-  --fs-h3: 19px; --fs-lede: clamp(17px, 1.3vw, 19px); --fs-sub: 17px; --fs-small: 14.5px; --fs-micro: 13px;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-micro: 120ms; --dur-long: 520ms;
-  --nav-h: 64px;
-  --sec-pad: 40px; --sec-pad-act: 80px; --block-gap: 24px;
-  --green-a: color-mix(in oklch, var(--color-green) 14%, transparent);
-  color-scheme: dark;
+  --bg: #0B0F14; --bg-2: #111827; --surface: #161B22; --line: #1F2937; --line-2: #2B3544;
+  --ink: #E5E7EB; --ink-2: #A7AFBC; --ink-3: #8B94A3;
+  --brand: #3B82F6; --brand-ink: #FFFFFF; --accent: #22D3EE;
+  --ok: #34D399; --no: #F87171; --warn: #FBBF24;
+  --code-bg: #0E141B; --code-ink: #D7DEE8; --code-dim: #7D8796;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+  --r-ctl: 8px; --r-card: 12px;
+  --f-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --page: 1120px; --gut: clamp(16px, 4vw, 32px);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg: #F7F8FA; --bg-2: #EEF1F5; --surface: #FFFFFF; --line: #E3E7ED; --line-2: #CDD3DC;
+    --ink: #111827; --ink-2: #4B5563; --ink-3: #6B7280;
+    --brand: #2563EB; --accent: #0E7490;
+    --ok: #047857; --no: #B91C1C; --warn: #B45309;
+    --code-bg: #0F172A; --code-ink: #E2E8F0; --code-dim: #94A3B8;
+  }
 }
 *, *::before, *::after{box-sizing: border-box;}
-html{overflow-x: clip; scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); -webkit-text-size-adjust: 100%;}
-body{margin: 0; overflow-x: clip; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;}
-img, svg{display: block; max-width: 100%;}
+html{-webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 72px;}
+body{margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--f-sans); -webkit-font-smoothing: antialiased; overflow-x: clip;}
+h1, h2, h3{margin: 0; line-height: 1.2; text-wrap: balance;}
 p{margin: 0; text-wrap: pretty;}
-a{color: var(--color-primary); text-underline-offset: 3px; text-decoration-thickness: 1px; transition: color var(--dur-micro) var(--ease-out);}
-a:hover{color: var(--color-ink);}
-:focus-visible{outline: 2px solid var(--color-focus); outline-offset: 3px; border-radius: 6px;}
-code, pre, kbd{font-family: var(--font-mono);}
-code{font-size: .88em; overflow-wrap: anywhere;}
-b, strong{font-weight: 600;}
-::selection{background: color-mix(in oklch, var(--color-primary) 38%, transparent); color: var(--color-ink);}
-h1, h2, h3{font-style: normal; overflow-wrap: anywhere; min-width: 0;}
-.wrap{max-width: var(--page-max); margin: 0 auto; padding: 0 var(--gutter);}
-.skip{position: absolute; left: var(--space-md); top: -60px; z-index: 400; background: var(--color-ink); color: var(--color-paper); padding: 10px 16px; border-radius: var(--radius-control); font-weight: 600; text-decoration: none;}
-.skip:focus{top: var(--space-md);}
+a{color: var(--brand); text-underline-offset: 3px;}
+a:hover{text-decoration-thickness: 2px;}
+:focus-visible{outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;}
+code, pre, kbd{font-family: var(--f-mono);}
+code{font-size: .9em; overflow-wrap: anywhere;}
+.wrap{max-width: var(--page); margin: 0 auto; padding: 0 var(--gut);}
+.skip{position: absolute; left: var(--s4); top: -48px; background: var(--ink); color: var(--bg); padding: var(--s2) var(--s4); border-radius: var(--r-ctl); z-index: 10;}
+.skip:focus{top: var(--s4);}
 
-/* Nav */
-nav[aria-label="Main"]{position: sticky; top: 0; z-index: 300; background: color-mix(in oklch, var(--color-paper) 78%, transparent); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); border-bottom: 1px solid color-mix(in oklch, var(--color-rule) 70%, transparent);}
-nav[aria-label="Main"] .wrap{display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--space-lg); height: var(--nav-h);}
-.brand{justify-self: start; display: inline-flex; align-items: center; gap: 10px; color: var(--color-ink); text-decoration: none; font-weight: 600; font-size: 17px; letter-spacing: -.01em; line-height: 1; white-space: nowrap;}
-.brand svg{width: 28px; height: 28px; flex: none;}
-.brand:hover{color: var(--color-ink);}
-nav .links{justify-self: center; display: flex; align-items: center; gap: 2px; padding: 4px; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); background: color-mix(in oklch, var(--color-panel) 70%, transparent);}
-nav .links a{color: var(--color-ink-2); text-decoration: none; font-size: 13.5px; font-weight: 500; line-height: 1; white-space: nowrap; padding: 8px 12px; border-radius: var(--radius-pill); transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);}
-nav .links a:hover{color: var(--color-ink); background: var(--color-panel-2);}
-nav .links a[aria-current]{color: var(--color-ink); background: color-mix(in oklch, var(--color-surface) 70%, var(--color-panel));}
-.gh{justify-self: end; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: var(--radius-control); background: var(--color-ink); color: var(--color-paper); text-decoration: none; font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; transition: background-color var(--dur-micro) var(--ease-out);}
-.gh:hover{background: var(--color-primary); color: var(--color-primary-ink);}
+/* Top bar: brand, sections, the two places the code lives. */
+.bar{position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);}
+.bar .wrap{display: flex; align-items: center; gap: var(--s5); height: 56px;}
+.brand{display: inline-flex; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 650; text-decoration: none; white-space: nowrap;}
+.brand svg{width: 24px; height: 24px; flex: none;}
+.bar nav{display: flex; gap: var(--s1); margin-left: auto; overflow-x: auto; scrollbar-width: none;}
+.bar nav::-webkit-scrollbar{display: none;}
+.bar nav a{color: var(--ink-2); text-decoration: none; font-size: 14px; padding: var(--s2) var(--s3); border-radius: var(--r-ctl); white-space: nowrap;}
+.bar nav a:hover{color: var(--ink); background: var(--bg-2);}
+.bar nav a[aria-current="true"]{color: var(--ink); background: var(--bg-2);}
+.bar .ext{display: flex; gap: var(--s4); font-size: 14px; white-space: nowrap;}
+.bar .ext a{color: var(--ink); font-weight: 600; text-decoration: none;}
+.bar .ext a:hover{color: var(--brand);}
 
-/* Hero */
-.hero{position: relative; padding: 24px 0 40px; isolation: isolate;}
-.hero::before{content: ""; position: absolute; z-index: -1; inset: -120px 0 auto; height: 760px; pointer-events: none; background: radial-gradient(38% 46% at 74% 34%, color-mix(in oklch, var(--color-surface) 70%, transparent), transparent 72%), radial-gradient(30% 36% at 12% 10%, color-mix(in oklch, var(--color-primary) 9%, transparent), transparent 70%);}
-.hero .wrap{position: relative; display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); gap: var(--space-xl); align-items: start;}
-.hero .wrap > *{min-width: 0;}
-.hero .wrap > div:first-child{padding-top: var(--space-md);}
-.eyebrow, .kicker{font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; line-height: 1.4;}
-.eyebrow{display: inline-flex; align-items: center; gap: 10px; color: var(--color-ink-2);}
-.eyebrow::before{content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--color-green); box-shadow: 0 0 0 3px var(--green-a);}
-h1{font-family: var(--font-display); font-weight: 500; font-size: var(--text-display); line-height: 1.04; letter-spacing: -.028em; margin: var(--space-lg) 0; text-wrap: balance;}
-h1 .thin, h2 .thin{font-weight: 500; color: var(--color-ink-2);}
-.lede{font-size: var(--fs-lede); line-height: 1.6; color: var(--color-ink-2); max-width: 60ch; margin: 0 0 var(--space-lg);}
-.lede a{color: var(--color-ink);}
-.cta{display: flex; gap: var(--space-sm); flex-wrap: wrap; align-items: center;}
-.btn{display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: var(--radius-control); border: 1px solid transparent; font-family: var(--font-body); font-weight: 600; font-size: 15px; line-height: 1; white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);}
-.btn:active{transform: translateY(1px);}
-.btn-primary{background: var(--color-primary); color: var(--color-primary-ink);}
-.btn-primary:hover{background: var(--color-ink); color: var(--color-paper);}
-.btn-ghost{border-color: var(--color-rule-strong); color: var(--color-ink); background: transparent;}
-.btn-ghost:hover{border-color: var(--color-primary); color: var(--color-ink); background: color-mix(in oklch, var(--color-surface) 40%, transparent);}
-.chips{list-style: none; margin: var(--space-xl) 0 0; padding: var(--space-lg) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-xs); border-top: 1px solid var(--color-rule);}
-.chip{font-size: 13px; color: var(--color-ink-2); border: 1px solid var(--color-rule); border-radius: var(--radius-pill); padding: 5px 12px; line-height: 1.3;}
-@keyframes hm-in{from{opacity: 0; transform: translateY(10px);} to{opacity: 1; transform: none;}}
-.hero .eyebrow, .hero h1, .hero .lede, .hero .cmdbox, .hero .cta, .hero .chips, .hero-stage{animation: hm-in var(--dur-long) var(--ease-out) both;}
-.hero .lede{animation-delay: 120ms;} .hero .cmdbox{animation-delay: 180ms;} .hero .cta{animation-delay: 240ms;} .hero .chips{animation-delay: 300ms;} .hero-stage{animation-delay: 200ms;}
-.hero-stage{display: grid; gap: var(--space-lg); padding-top: var(--space-md);}
-.mark{justify-self: center; width: min(100%, 240px); aspect-ratio: 1; position: relative; isolation: isolate;}
-.mark::before{content: ""; position: absolute; inset: 6%; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in oklch, var(--color-primary) 18%, transparent), transparent 72%);}
-.mark svg{width: 100%; height: 100%;}
+/* Hero: the promise on the left, the actual setup on the right. */
+.hero{padding: var(--s8) 0 var(--s7);}
+/* Laptop: the promise and its proof on the left, the setup on the right. Phone: promise, setup, then proof. */
+.hero .wrap{display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-areas: "intro setup" "proof setup"; grid-template-rows: auto 1fr; column-gap: var(--s7); align-items: start;}
+.intro{grid-area: intro;} .proof{grid-area: proof;} .setup{grid-area: setup;}
+h1{font-size: clamp(32px, 2.4vw + 18px, 44px); font-weight: 700; letter-spacing: -.02em;}
+.lead{margin-top: var(--s4); font-size: 18px; color: var(--ink-2); max-width: 46ch;}
+.facts{margin: var(--s5) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s3);}
+.facts li{display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--s3); color: var(--ink-2); font-size: 15px;}
+.facts svg{width: 20px; height: 20px; margin-top: 2px;}
+.facts b{color: var(--ink); font-weight: 600;}
+.hero .links{margin-top: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); font-size: 15px;}
 
-/* Install command with copy button */
-.cmdbox{display: flex; align-items: stretch; margin: 0 0 var(--space-lg); background: var(--color-term); border: 1px solid var(--color-rule); border-radius: var(--radius-card); overflow: hidden; max-width: 100%;}
-.cmdbox pre{flex: 1 1 auto; min-width: 0; margin: 0; border: 0; border-radius: 0; background: transparent; white-space: pre-wrap; overflow-wrap: anywhere; padding: var(--space-md) var(--space-lg);}
-.copy{flex: none; align-self: stretch; min-width: 76px; border: 0; border-left: 1px solid var(--color-rule); background: var(--color-panel); color: var(--color-ink); font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; padding: 0 var(--space-md); transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);}
-.copy:hover{background: var(--color-primary); color: var(--color-primary-ink);}
+/* The setup card: three steps, the middle one with the command. */
+.setup{background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s5);}
+.setup h2{font-size: 17px; font-weight: 650;}
+.setup ol{margin: var(--s4) 0 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: var(--s5);}
+.setup li{counter-increment: step; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--s3);}
+.setup li::before{content: counter(step); width: 28px; height: 28px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line-2); color: var(--ink); font-size: 14px; font-weight: 650; display: grid; place-items: center;}
+.setup li > div{min-width: 0;}
+.setup h3{font-size: 15px; font-weight: 650; line-height: 28px;}
+.setup p{color: var(--ink-2); font-size: 14px; margin-top: var(--s1);}
+.tabs{display: flex; gap: var(--s1); margin: var(--s3) 0 var(--s2);}
+.tabs button{font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); background: transparent; border: 1px solid var(--line); border-radius: var(--r-ctl); padding: 6px var(--s3); min-height: 32px; cursor: pointer;}
+.tabs button[aria-selected="true"]{color: var(--ink); background: var(--bg-2); border-color: var(--line-2);}
+html:not(.js) .tabs{display: none;}
+html:not(.js) .panel + .panel{margin-top: var(--s3);}
 
-/* Sections */
-section{position: relative; padding: var(--sec-pad) 0;}
-section.act{padding-top: var(--sec-pad-act); border-top: 1px solid var(--color-rule);}
-section.tint{background: var(--color-paper-2);}
-.sec-head{display: block; max-width: 780px; margin: 0 0 var(--space-xl);}
-.kicker{display: block; color: var(--color-ink-2);}
-.sec-head .kicker{margin-bottom: var(--space-md);}
-h2{font-family: var(--font-display); font-size: var(--text-h2); font-weight: 500; letter-spacing: -.024em; line-height: 1.06; margin: 0 0 var(--space-md); text-wrap: balance;}
-.sub{color: var(--color-ink-2); font-size: var(--fs-sub); line-height: 1.6; max-width: 64ch; margin: 0;}
-.sub a{color: var(--color-ink);}
-h3{font-family: var(--font-display); font-size: var(--fs-h3); font-weight: 600; letter-spacing: -.012em; line-height: 1.3; margin: 0 0 var(--space-xs); text-wrap: balance;}
-section > .wrap > * + *{margin-top: var(--block-gap);}
-section > .wrap > .sec-head + *{margin-top: 0;}
-@media (min-width: 961px){
-  .sec-head{display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); column-gap: var(--space-2xl); align-items: end; max-width: none;}
-  .sec-head h2{margin-bottom: 0;}
-  .sec-head .kicker{grid-column: 1 / -1;}
-  .sec-head .sub{padding-bottom: 6px;}
+/* Code: a small head says where it goes and holds Copy, so the code itself has the full width. */
+.code{background: var(--code-bg); border-radius: var(--r-ctl); color: var(--code-ink); overflow: hidden;}
+.code-head{display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s1) var(--s1) var(--s1) var(--s4); border-bottom: 1px solid rgba(255,255,255,.08); font: 12px var(--f-mono); color: var(--code-dim);}
+.code pre{margin: 0; padding: var(--s3) var(--s4) var(--s4); overflow-x: auto; font-size: 13px; line-height: 1.65; white-space: pre;}
+.copy{font: 600 12px var(--f-sans); color: var(--code-ink); background: transparent; border: 0; border-radius: 6px; padding: 0 var(--s3); min-height: 32px; cursor: pointer;}
+.copy:hover{background: rgba(255,255,255,.1);}
+html:not(.js) .copy{visibility: hidden;}
+
+/* Sections: space separates, not boxes. */
+section{padding: var(--s8) 0; border-top: 1px solid var(--line);}
+.head{max-width: 64ch; margin-bottom: var(--s6);}
+h2{font-size: 28px; font-weight: 700; letter-spacing: -.015em;}
+.head p{margin-top: var(--s3); color: var(--ink-2);}
+
+/* Can / cannot: the decision a cautious reader makes first. */
+.split{display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6);}
+.split h3{display: flex; align-items: center; gap: var(--s2); font-size: 17px; font-weight: 650; padding-bottom: var(--s3); border-bottom: 1px solid var(--line);}
+.dot{width: 10px; height: 10px; border-radius: 50%; flex: none;}
+.dot.ok{background: var(--ok);} .dot.no{background: var(--no);}
+.split ul{margin: 0; padding: 0; list-style: none;}
+.split li{padding: var(--s3) 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s4); align-items: baseline;}
+.split li span{color: var(--ink-2); font-size: 14px;}
+.split li code{color: var(--ink-3); font-size: 12.5px; white-space: nowrap;}
+.callout{margin-top: var(--s6); display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--s3); padding: var(--s4) var(--s5); background: var(--bg-2); border-radius: var(--r-card); color: var(--ink-2);}
+.callout svg{width: 24px; height: 24px; color: var(--brand);}
+.callout b{color: var(--ink);}
+
+/* Tables: rows, not boxes. */
+.table{overflow-x: auto;}
+table{width: 100%; border-collapse: collapse; font-size: 14px;}
+th{text-align: left; font-size: 13px; font-weight: 600; color: var(--ink-3); padding: 0 var(--s4) var(--s3) 0; border-bottom: 1px solid var(--line-2); white-space: nowrap;}
+td{padding: var(--s3) var(--s4) var(--s3) 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2);}
+td:first-child{color: var(--ink); white-space: nowrap;}
+td code{color: var(--ink);}
+.tag{display: inline-block; margin-left: var(--s2); font-size: 12px; font-weight: 600; color: var(--warn); white-space: nowrap;}
+.tag::before{content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; vertical-align: 2px;}
+.after{margin-top: var(--s4); color: var(--ink-3); font-size: 14px; max-width: 72ch;}
+
+/* Protection: a plain two-column list. */
+.facts-grid{display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s6); margin: 0; padding: 0; list-style: none;}
+.facts-grid b{display: block; font-weight: 650; margin-bottom: var(--s1);}
+.facts-grid span{color: var(--ink-2); font-size: 15px;}
+
+/* Two-column reference (prompts, ways to run, errors). */
+.ref{display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6);}
+.ref h3{font-size: 17px; font-weight: 650; margin-bottom: var(--s3);}
+dl{margin: 0;}
+dt{font-weight: 600; margin-top: var(--s4);}
+dt:first-child{margin-top: 0;}
+dd{margin: var(--s1) 0 0; color: var(--ink-2); font-size: 15px;}
+
+/* FAQ: separated by lines, no cards. */
+.faq details{border-bottom: 1px solid var(--line);}
+.faq summary{list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: var(--s4); padding: var(--s4) 0; font-weight: 600; min-height: 44px; align-items: center;}
+.faq summary::-webkit-details-marker{display: none;}
+.faq summary::after{content: "+"; color: var(--ink-3); font-size: 20px; line-height: 1; flex: none;}
+.faq details[open] summary::after{content: "\2212";}
+.faq p{color: var(--ink-2); padding: 0 0 var(--s4); max-width: 72ch;}
+
+footer{border-top: 1px solid var(--line); padding: var(--s6) 0 var(--s7); color: var(--ink-3); font-size: 14px;}
+footer .wrap{display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s3) var(--s5);}
+footer nav{display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5);}
+footer a{color: var(--ink-2);}
+
+@media (max-width: 900px){
+  .bar .ext{display: none;}
+  .hero{padding-top: var(--s6);}
+  .split, .ref, .facts-grid{grid-template-columns: minmax(0, 1fr);}
+  .hero .wrap{grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "setup" "proof"; grid-template-rows: none; row-gap: var(--s6);}
+  .hero .facts{margin-top: 0;}
+  section{padding: var(--s7) 0;}
 }
-
-/* Surfaces */
-.grid{display: grid; gap: var(--space-md);}
-.card{background: var(--color-panel); border: 1px solid var(--color-rule); border-radius: var(--radius-card); padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-xs); min-width: 0;}
-.card h3{margin: 0;}
-.card p{color: var(--color-ink-2); margin: 0; font-size: var(--fs-small); line-height: 1.6;}
-.card .tag{font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; color: var(--color-ink-3); letter-spacing: .06em; text-transform: uppercase;}
-.card.is-surface{background: color-mix(in oklch, var(--color-surface) 34%, var(--color-panel)); border-color: color-mix(in oklch, var(--color-surface) 60%, var(--color-rule));}
-.card.is-surface p{color: var(--color-ink-on-surface);}
-.card.is-surface .tag{color: var(--color-primary);}
-.card code{color: var(--color-ink); font-size: 12.5px;}
-.g2{grid-template-columns: repeat(2, minmax(0, 1fr));}
-.g3{grid-template-columns: repeat(3, minmax(0, 1fr));}
-table{width: 100%; border-collapse: collapse; font-size: var(--fs-small);}
-th, td{text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--color-rule); vertical-align: top;}
-tr:last-child td{border-bottom: 0;}
-th{font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-ink-3); white-space: nowrap; background: var(--color-paper-2);}
-td{color: var(--color-ink-2);}
-td:first-child{color: var(--color-ink); font-weight: 500;}
-td code{color: var(--color-ink);}
-.table-wrap{overflow-x: auto; border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-panel);}
-.note{font-size: var(--fs-micro); color: var(--color-ink-3); max-width: 72ch; line-height: 1.6;}
-.note code{color: var(--color-ink-2);}
-pre{background: var(--color-term); border: 1px solid var(--color-rule); border-radius: var(--radius-card); padding: var(--space-lg); overflow-x: auto; font-size: 13px; line-height: 1.7; color: var(--color-term-ink); margin: 0; tab-size: 2; max-width: 100%;}
-.c{color: var(--color-term-comment);}
-.k{color: var(--color-primary);}
-.s{color: var(--color-amber);}
-.host{padding: var(--space-md) var(--space-lg); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: color-mix(in oklch, var(--color-surface) 32%, var(--color-panel)); color: var(--color-ink-on-surface); font-size: 14.5px; line-height: 1.6;}
-.host b{color: var(--color-ink);}
-.host b::before{content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--color-amber); margin-right: 8px; vertical-align: 1px;}
-.host a{color: var(--color-ink);}
-.pill-row{display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: 0; padding: 0; list-style: none;}
-.badge{font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: var(--radius-pill); border: 1px solid var(--color-rule-strong); color: var(--color-ink-2); line-height: 1.5; white-space: nowrap;}
-.badge.write{color: var(--color-amber); border-color: color-mix(in oklch, var(--color-amber) 45%, transparent);}
-
-/* Steps */
-.steps{display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-lg); padding: 0; margin: 0; list-style: none;}
-.steps li{position: relative; padding-top: var(--space-md); border-top: 1px solid var(--color-rule-strong); min-width: 0;}
-.steps li::before{content: ""; position: absolute; top: -5px; left: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary);}
-.steps h3{font-size: 18px;}
-.steps p{color: var(--color-ink-2); font-size: var(--fs-small);}
-.steps code{color: var(--color-ink);}
-
-/* Connect */
-.snips{display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-lg); align-items: start;}
-.snip{min-width: 0; display: grid; gap: var(--space-sm); align-content: start;}
-.snip .label{display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--space-sm); margin: 0;}
-.snip .label h3{margin: 0;}
-.snip .where{font-family: var(--font-mono); font-size: 12px; color: var(--color-ink-3); overflow-wrap: anywhere;}
-.snip p{color: var(--color-ink-2); font-size: var(--fs-small);}
-.snip p code{color: var(--color-ink);}
-
-/* Safety list */
-.sec-list{display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--color-rule); padding: 0; margin: 0; list-style: none;}
-.sec-list li{padding: var(--space-lg) var(--space-lg) var(--space-lg) 0; border-bottom: 1px solid var(--color-rule); min-width: 0;}
-.sec-list li:nth-child(even){padding-left: var(--space-lg); border-left: 1px solid var(--color-rule);}
-.sec-list b{display: block; color: var(--color-ink); margin-bottom: var(--space-2xs); font-weight: 600;}
-.sec-list span{color: var(--color-ink-2); font-size: var(--fs-small);}
-.sec-list code{color: var(--color-ink);}
-
-/* Flow */
-.flow{display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md);}
-
-/* FAQ */
-.faq{display: grid; gap: var(--space-sm);}
-details{border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-panel); padding: 0 var(--space-lg);}
-summary{cursor: pointer; padding: var(--space-md) 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: var(--space-md); align-items: baseline;}
-summary::-webkit-details-marker{display: none;}
-summary::after{content: "+"; font-family: var(--font-mono); color: var(--color-primary); flex: none;}
-details[open] summary::after{content: "\2212";}
-details p{color: var(--color-ink-2); font-size: var(--fs-small); padding: 0 0 var(--space-md); max-width: 72ch;}
-details p code{color: var(--color-ink);}
-
-/* Footer */
-footer{border-top: 1px solid var(--color-rule); padding: var(--sec-pad-act) 0 var(--space-xl); color: var(--color-ink-3); font-size: 14px; position: relative; isolation: isolate; overflow: hidden;}
-footer::before{content: ""; position: absolute; z-index: -1; inset: 0 0 auto; height: 520px; pointer-events: none; background: radial-gradient(44% 70% at 18% 0%, color-mix(in oklch, var(--color-surface) 58%, transparent), transparent 72%);}
-.final{padding: 0 0 var(--space-3xl);}
-.final .kicker{color: var(--color-primary); margin-bottom: var(--space-md);}
-.final h2{color: var(--color-ink); font-size: clamp(2.25rem, 4.4vw + 1rem, 4.5rem); line-height: 1.02; letter-spacing: -.032em; max-width: 16ch; margin-bottom: var(--space-lg);}
-.final .sub{max-width: 58ch; margin-bottom: var(--space-xl);}
-footer .foot-meta{display: flex; gap: var(--space-md) var(--space-lg); flex-wrap: wrap; justify-content: space-between; align-items: baseline; padding-top: var(--space-lg); border-top: 1px solid var(--color-rule);}
-footer .foot-meta a{color: var(--color-ink-2); white-space: nowrap;}
-footer .foot-meta a:hover{color: var(--color-ink);}
-footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-lg);}
-
-/* Responsive */
-@media (max-width: 1100px){
-  html{scroll-padding-top: 124px;}
-  nav[aria-label="Main"] .wrap{display: flex; flex-wrap: wrap; height: auto; padding-top: 10px; row-gap: 0;}
-  nav[aria-label="Main"] .gh{margin-left: auto; height: 34px;}
-  nav .links{order: 3; flex: 0 0 calc(100% + 2 * var(--gutter)); margin: 10px calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter); height: 48px; border: 0; border-top: 1px solid var(--color-rule); border-radius: 0; background: transparent; gap: var(--space-2xs); overflow-x: auto; scrollbar-width: none;}
-  nav .links::-webkit-scrollbar{display: none;}
+@media (max-width: 560px){
+  /* One scroll on a phone: the section menu goes, GitHub stays. */
+  .bar nav{display: none;}
+  .bar .ext{display: flex; margin-left: auto;}
+  .bar .ext a[href*="npmjs"]{display: none;}
+  .bar .ext a{display: inline-flex; align-items: center; min-height: 44px;}
+  .setup{padding: var(--s4); margin: 0 calc(-1 * var(--s1));}
+  /* Long lines wrap on a phone; Copy still takes the command as written. */
+  .code pre{white-space: pre-wrap; overflow-wrap: anywhere;}
+  h2{font-size: 24px;}
+  .split li{grid-template-columns: minmax(0, 1fr);}
+  .split li code{white-space: normal;}
+  table, thead, tbody, tr, td{display: block;}
+  thead{display: none;}
+  tr{padding: var(--s3) 0; border-bottom: 1px solid var(--line);}
+  td{border: 0; padding: 2px 0;}
 }
-@media (max-width: 960px){
-  .hero .wrap{grid-template-columns: minmax(0, 1fr);}
-  .hero-stage{padding-top: 0;}
-  .mark{width: min(52%, 180px);}
-  .g3, .g2, .snips, .flow{grid-template-columns: minmax(0, 1fr);}
-  .steps{grid-template-columns: minmax(0, 1fr);}
-  .sec-list{grid-template-columns: minmax(0, 1fr);}
-  .sec-list li:nth-child(even){padding-left: 0; border-left: 0;}
-}
-@media (max-width: 700px){
-  .stack thead{display: none;}
-  .stack tr{display: block; padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-rule);}
-  .stack tr:last-child{border-bottom: 0;}
-  .stack td{display: block; border: 0; padding: 4px var(--space-md);}
-  .stack td::before{content: attr(data-label); display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-ink-3);}
-  :root{--sec-pad-act: 56px;}
-  .btn{height: 48px;}
-  .cta .btn{flex: 1 1 auto;}
-}
-@media (prefers-reduced-motion: reduce){
-  html{scroll-behavior: auto;}
-  .hero .eyebrow, .hero h1, .hero .lede, .hero .cmdbox, .hero .cta, .hero .chips, .hero-stage{animation: none;}
-}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior: auto;}}
 </style>
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav aria-label="Main">
+
+<header class="bar">
   <div class="wrap">
-    <a class="brand" href="#top">
-      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 3 28 10v12L16 29 4 22V10z" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="#22d3ee"/></svg>cob-portal-mcp
+    <a class="brand" href="#top" aria-label="cob-portal-mcp, top of the page">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#3B82F6"/><path d="M9 11h14M9 16h9M9 21h6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+      cob-portal-mcp
     </a>
-    <div class="links">
-      <a href="#what">What it does</a>
-      <a href="#safety">Safety</a>
-      <a href="#install">Install</a>
-      <a href="#tools">Tools</a>
+    <nav aria-label="Sections">
+      <a href="#limits">Can and cannot</a>
       <a href="#scopes">Scopes</a>
-      <a href="#prompts">Prompts</a>
+      <a href="#protect">Your key</a>
+      <a href="#tools">Tools</a>
+      <a href="#more">Reference</a>
       <a href="#faq">FAQ</a>
+    </nav>
+    <div class="ext">
+      <a href="https://github.com/callobuzz/cob-portal-mcp">GitHub</a>
+      <a href="https://www.npmjs.com/package/cob-portal-mcp">npm</a>
     </div>
-    <a class="gh" href="https://github.com/callobuzz/cob-portal-mcp">GitHub</a>
   </div>
-</nav>
+</header>
 
 <main id="main">
-<section class="hero">
+<div class="hero">
   <div class="wrap">
-    <div>
-      <div class="eyebrow">MCP server · for the Call O Buzz portal · MIT</div>
-      <h1>Let your agent draft the work. <span class="thin">A person approves it.</span></h1>
-      <p class="lede">cob-portal-mcp is an MCP server for the Call O Buzz portal. An AI agent reads tasks and sends drafts and notes. It cannot assign, approve, pay, send mail or delete. It runs on your computer with a personal API key.</p>
-      <div class="cmdbox">
-        <pre id="install-cmd" tabindex="0" aria-label="Install command"><span class="k">npx</span> -y cob-portal-mcp</pre>
-        <button class="copy" type="button" data-copy="npx -y cob-portal-mcp" aria-label="Copy the install command">Copy</button>
-      </div>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://github.com/callobuzz/cob-portal-mcp">View on GitHub</a>
-        <a class="btn btn-ghost" href="https://www.npmjs.com/package/cob-portal-mcp">View on npm</a>
-        <a class="btn btn-ghost" href="https://callobuzz.com/open-source">Callobuzz open source</a>
-      </div>
-      <ul class="chips" aria-label="At a glance">
-        <li class="chip">Node.js 22+</li>
-        <li class="chip">Drafts and notes only</li>
-        <li class="chip">Scoped by the key</li>
-        <li class="chip">MIT licence</li>
+    <div class="intro">
+      <h1>Connect your AI agent to the Call&nbsp;O&nbsp;Buzz portal</h1>
+      <p class="lead">Your agent reads the team's tasks and drafts new ones. Nothing becomes real work until a person approves it in the portal.</p>
+    </div>
+    <div class="proof">
+      <ul class="facts">
+        <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 10.5 8.5 14 15 6.5" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Drafts and notes only.</b> It cannot assign, approve, pay, send mail or delete.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 10.5 8.5 14 15 6.5" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Runs on your computer</b> with your own key, cut down to the scopes you pick.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 10.5 8.5 14 15 6.5" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Claude Code, Claude Desktop</b> or any MCP client. Node.js 22 or newer.</span></li>
       </ul>
+      <p class="links"><a href="#limits">What the agent can and cannot do</a> <a href="https://github.com/callobuzz/cob-portal-mcp">Source on GitHub</a></p>
     </div>
-    <div class="hero-stage">
-      <div class="mark" aria-hidden="true">
-        <svg viewBox="0 0 200 200" focusable="false"><path d="M100 18 172 60v80l-72 42-72-42V60z" fill="none" stroke="#22d3ee" stroke-width="10" stroke-linejoin="round" stroke-opacity=".9"/><path d="M100 54 142 78v44l-42 24-42-24V78z" fill="none" stroke="#3b82f6" stroke-width="6" stroke-linejoin="round"/><circle cx="100" cy="100" r="16" fill="#22d3ee"/></svg>
+
+    <div class="setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">Set it up in three steps</h2>
+      <ol>
+        <li><div>
+          <h3>Make a key in the portal</h3>
+          <p>Profile, then API keys. Two-step sign-in must be on. Tick only the scopes you need (<a href="#scopes">which ones</a>). The portal shows the key once, so copy it then.</p>
+        </div></li>
+        <li><div>
+          <h3>Add the server to your agent</h3>
+          <div class="tabs" role="tablist" aria-label="Your agent">
+            <button type="button" role="tab" id="tab-code" aria-controls="panel-code" aria-selected="true">Claude Code</button>
+            <button type="button" role="tab" id="tab-desk" aria-controls="panel-desk" aria-selected="false" tabindex="-1">Claude Desktop</button>
+          </div>
+          <div class="panel" id="panel-code" role="tabpanel" aria-labelledby="tab-code">
+            <div class="code"><div class="code-head"><span>Terminal</span><button class="copy" type="button" aria-label="Copy the Claude Code command">Copy</button></div><pre tabindex="0">claude mcp add cob-portal \
+  --env COB_PORTAL_URL=https://your-portal-address \
+  --env COB_PORTAL_KEY=cob_your_key_here \
+  -- npx -y cob-portal-mcp</pre></div>
+          </div>
+          <div class="panel" id="panel-desk" role="tabpanel" aria-labelledby="tab-desk">
+            <div class="code"><div class="code-head"><span>claude_desktop_config.json, inside "mcpServers"</span><button class="copy" type="button" aria-label="Copy the Claude Desktop setting">Copy</button></div><pre tabindex="0">"cob-portal": {
+  "command": "npx",
+  "args": ["-y", "cob-portal-mcp"],
+  "env": {
+    "COB_PORTAL_URL": "https://your-portal-address",
+    "COB_PORTAL_KEY": "cob_your_key_here"
+  }
+}</pre></div>
+          </div>
+          <p>The portal's "Copy MCP setup" button gives this with your address and key filled in.</p>
+        </div></li>
+        <li><div>
+          <h3>Ask the agent to run <code>whoami</code></h3>
+          <p>It answers with your name, the key's name, its scopes and its end date. A wrong key gets a plain message that says what to do.</p>
+        </div></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<section id="limits" aria-labelledby="limits-title">
+  <div class="wrap">
+    <div class="head">
+      <h2 id="limits-title">What the agent can and cannot do</h2>
+      <p>The server offers only these actions. The portal checks every one again, so a changed server cannot do more.</p>
+    </div>
+    <div class="split">
+      <div>
+        <h3><span class="dot ok" aria-hidden="true"></span>It can</h3>
+        <ul>
+          <li><span>Read tasks, with their steps, answers and notes</span><code>work:read</code></li>
+          <li><span>Read task templates and categories</span><code>work:read</code></li>
+          <li><span>Read the results of a test check list</span><code>checks:read</code></li>
+          <li><span>Send draft tasks, a main task with sub-tasks</span><code>work:draft</code></li>
+          <li><span>Send a test plan as a check list draft</span><code>work:draft</code></li>
+          <li><span>Write a note on a task, marked as written through the key</span><code>work:comment</code></li>
+        </ul>
       </div>
-      <pre tabindex="0" aria-label="A first check"><span class="c"># after install, ask the agent to run whoami</span>
-<span class="k">whoami</span>
-<span class="c"># answers with your name, the key name,</span>
-<span class="c"># its scopes and its end date</span></pre>
+      <div>
+        <h3><span class="dot no" aria-hidden="true"></span>It cannot</h3>
+        <ul>
+          <li><span>Approve a draft, its own or anyone's</span></li>
+          <li><span>Assign a task or choose who gets it</span></li>
+          <li><span>Change or close a task</span></li>
+          <li><span>Pay, or touch salary and invoices</span></li>
+          <li><span>Send mail or messages</span></li>
+          <li><span>Delete anything</span></li>
+        </ul>
+      </div>
     </div>
+    <p class="callout"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Every draft waits for a person.</b> In the portal, someone approves or rejects each draft and decides who gets the task. Sub-tasks can wait so they are given out one by one later.</span></p>
   </div>
 </section>
 
-<section class="act" id="what">
+<section id="scopes" aria-labelledby="scopes-title">
   <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">What it does</div>
-      <h2>The agent proposes. <span class="thin">A person decides.</span></h2>
-      <p class="sub">A good agent can plan work, write a test plan or break a goal into tasks. The portal is where a team tracks that work. This server connects the two and keeps a person in charge.</p>
-    </header>
-    <div class="grid flow">
-      <div class="card is-surface"><div class="tag">1 · Read</div><h3>The agent reads</h3><p>It lists tasks, templates and categories. It reads one task with its steps, answers and notes.</p></div>
-      <div class="card is-surface"><div class="tag">2 · Draft</div><h3>The agent proposes</h3><p>It sends draft tasks, as a main task with sub-tasks, or a test plan as a check list draft. It can also write a note on a task.</p></div>
-      <div class="card is-surface"><div class="tag">3 · Approve</div><h3>A person decides</h3><p>The drafts wait in the portal. A person approves or rejects them and chooses who gets each task.</p></div>
+    <div class="head">
+      <h2 id="scopes-title">Pick the scopes for the job</h2>
+      <p>A key acts as you, cut down to the scopes you tick. It never has more rights than you. Tick the fewest that do the job.</p>
     </div>
+    <div class="table">
+      <table>
+        <thead><tr><th scope="col">You want the agent to</th><th scope="col">Tick</th><th scope="col">Tools it gets</th></tr></thead>
+        <tbody>
+          <tr><td>Answer questions about the work</td><td><code>work:read</code></td><td><code>list_tasks</code>, <code>get_task</code>, <code>list_templates</code>, <code>list_categories</code></td></tr>
+          <tr><td>Plan work and draft tasks</td><td><code>work:read</code> + <code>work:draft</code></td><td>the four above, and <code>draft_tasks</code>, <code>list_drafts</code>, <code>get_draft</code></td></tr>
+          <tr><td>Write a test plan</td><td><code>work:read</code> + <code>work:draft</code></td><td>the same, and <code>draft_checklist</code></td></tr>
+          <tr><td>Leave notes on tasks</td><td>add <code>work:comment</code></td><td><code>add_comment</code></td></tr>
+          <tr><td>Read test results</td><td>add <code>checks:read</code></td><td><code>get_check_results</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="after"><code>whoami</code> needs no scope. The server asks the portal for the key's scopes at start and offers only the tools they allow, so a missing tool means a missing scope.</p>
   </div>
 </section>
 
-<section class="act tint" id="safety">
+<section id="protect" aria-labelledby="protect-title">
   <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">Safety model</div>
-      <h2>Drafts and notes only. <span class="thin">Nothing else.</span></h2>
-      <p class="sub">The server runs on your computer. The key sets what the agent can reach. See <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">SECURITY.md</a> to report a problem.</p>
-    </header>
-    <ul class="sec-list">
-      <li><b>It runs on your computer</b><span>The server is a local program. The agent talks to it over stdio, and it talks to the portal.</span></li>
-      <li><b>The key goes over https only</b><span>A plain http address is refused, except <code>localhost</code>. A redirect is never followed, so the key is never sent on to another address.</span></li><li><b>Portal text is data</b><span>Task text and notes are written by people. The server tells the agent to read them as data, never as instructions.</span></li><li><b>The key stays in the header</b><span>The server sends the key only as an <code>Authorization: Bearer</code> header. It never writes the key to a log, an error or a URL.</span></li>
-      <li><b>The key acts as you, cut to its scopes</b><span>A key never has more rights than the person who made it. The server offers only the tools its scopes allow.</span></li>
-      <li><b>Drafts and notes only</b><span>The agent cannot approve, assign, change a task, pay, send mail or delete.</span></li>
-      <li><b>A person approves every draft</b><span>Nothing becomes a task until a person approves it in the portal. That person decides who gets it.</span></li>
-      <li><b>Revoke a key at any time</b><span>Open the portal Profile page and revoke the key. It stops working at once.</span></li>
+    <div class="head">
+      <h2 id="protect-title">How your key is protected</h2>
+      <p>The key acts as you, so the server treats it with care.</p>
+    </div>
+    <ul class="facts-grid">
+      <li><b>Https only</b><span>A plain http address is refused, except <code>localhost</code> for a test portal on your own computer.</span></li>
+      <li><b>No redirects followed</b><span>If the address sends the call somewhere else, the call stops, so the key never goes to another server.</span></li>
+      <li><b>Only in the header</b><span>The key travels as an <code>Authorization: Bearer</code> header. It is never written to a log, an error or a web address.</span></li>
+      <li><b>Portal text is data</b><span>Task text and notes are written by people. The server tells the agent to read them as data, never as instructions.</span></li>
+      <li><b>One retry, one draft</b><span>Every send carries a new <code>Idempotency-Key</code>, so a repeated call never makes a second draft or note.</span></li>
+      <li><b>Revoke at once</b><span>Revoke the key on the portal Profile page and it stops working on the next call.</span></li>
     </ul>
   </div>
 </section>
 
-<section class="act" id="install">
+<section id="tools" aria-labelledby="tools-title">
   <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">Install</div>
-      <h2>Make a key. <span class="thin">Add the server.</span></h2>
-      <p class="sub">You need Node.js 22 or newer. npx downloads the server from npm and starts it. Nothing is built on your computer.</p>
-    </header>
-    <ol class="steps">
-      <li>
-        <h3>Make a key</h3>
-        <p>Sign in to the portal with two-step sign-in (2FA) on. Open <b>Profile</b>, then <b>API keys</b>. Choose the scopes and how long the key lasts. Copy it at once. The portal shows it one time.</p>
-      </li>
-      <li>
-        <h3>Add the server</h3>
-        <p>Use one of the snippets below. Set <code>COB_PORTAL_URL</code> and <code>COB_PORTAL_KEY</code>. The Profile page also shows a block with both values filled in (&ldquo;Copy MCP setup&rdquo;).</p>
-      </li>
-      <li>
-        <h3>Check it</h3>
-        <p>Ask the agent to run <code>whoami</code>. It answers with your name, the key name and its scopes.</p>
-      </li>
-    </ol>
-    <div class="snips">
-      <div class="snip">
-        <div class="label"><h3>Claude Code</h3><span class="where">terminal</span></div>
-<pre tabindex="0"><span class="k">claude</span> mcp add cob-portal \
-  --env COB_PORTAL_URL=https://your-portal-address \
-  --env COB_PORTAL_KEY=cob_your_key_here \
-  -- npx -y cob-portal-mcp</pre>
-        <p>To stay on one version, write <code>cob-portal-mcp@0.2.1</code>. To run it straight from GitHub, write <code>github:callobuzz/cob-portal-mcp</code>.</p>
-      </div>
-      <div class="snip">
-        <div class="label"><h3>Claude Desktop</h3><span class="where">claude_desktop_config.json</span></div>
-<pre tabindex="0">{
-  "mcpServers": {
-    "cob-portal": {
-      "command": "npx",
-      "args": ["-y", "cob-portal-mcp"],
-      "env": {
-        "COB_PORTAL_URL": "https://your-portal-address",
-        "COB_PORTAL_KEY": "cob_your_key_here"
-      }
-    }
-  }
-}</pre>
-        <p>Restart Claude Desktop after you save the file.</p>
-      </div>
-      <div class="snip">
-        <div class="label"><h3>A folder copy</h3><span class="where">instead of npx</span></div>
-        <p>Clone the repository. Then use <code>node &lt;path&gt;/dist/cli.js</code> in place of <code>npx -y ...</code>. On Windows write the path with forward slashes, for example <code>J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js</code>.</p>
-      </div>
-      <div class="snip">
-        <div class="label"><h3>Why it needs no build</h3></div>
-        <p>The built files in <code>dist/</code> are in the npm package and committed to the repository, and <code>bin</code> points at <code>dist/cli.js</code>. npx installs the two runtime packages (<code>@modelcontextprotocol/sdk</code>, <code>zod</code>) and runs it. There is no <code>prepare</code> script.</p>
-      </div>
+    <div class="head">
+      <h2 id="tools-title">The eleven tools</h2>
+      <p>Tools marked <span class="tag" style="margin-left:0">writes</span> send something to the portal. The rest only read.</p>
     </div>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Settings">
-      <table class="stack">
-        <thead><tr><th>Variable</th><th>Needed</th><th>Meaning</th></tr></thead>
+    <div class="table">
+      <table>
+        <thead><tr><th scope="col">Tool</th><th scope="col">Scope</th><th scope="col">What it does</th></tr></thead>
         <tbody>
-          <tr><td data-label="Variable"><code>COB_PORTAL_URL</code></td><td data-label="Needed">yes</td><td data-label="Meaning">The portal address, as the Profile page shows it. It must be https; plain http is allowed only for <code>localhost</code>.</td></tr>
-          <tr><td data-label="Variable"><code>COB_PORTAL_KEY</code></td><td data-label="Needed">yes</td><td data-label="Meaning">A personal key that starts with <code>cob_</code>. The server sends it only as an <code>Authorization: Bearer</code> header.</td></tr>
-          <tr><td data-label="Variable"><code>COB_PORTAL_TIMEOUT_MS</code></td><td data-label="Needed">no</td><td data-label="Meaning">How long to wait for one portal answer. Default <code>30000</code>. Minimum <code>1000</code>.</td></tr>
+          <tr><td><code>whoami</code></td><td>none</td><td>Shows you, the key's name, its scopes and its end date.</td></tr>
+          <tr><td><code>list_tasks</code></td><td><code>work:read</code></td><td>Lists your tasks or your team's, by status, category or parent task.</td></tr>
+          <tr><td><code>get_task</code></td><td><code>work:read</code></td><td>Reads one task with its steps, answers, notes, category and sub-task count.</td></tr>
+          <tr><td><code>list_templates</code></td><td><code>work:read</code></td><td>Lists the published task templates, with their category.</td></tr>
+          <tr><td><code>list_categories</code></td><td><code>work:read</code></td><td>Lists the task categories the portal offers.</td></tr>
+          <tr><td><code>get_check_results</code></td><td><code>checks:read</code></td><td>Reads the test runs and skips of a check list task. File names only, no files.</td></tr>
+          <tr><td><code>draft_tasks</code><span class="tag">writes</span></td><td><code>work:draft</code></td><td>Sends a batch of draft tasks. Use <code>ref</code> and <code>parentRef</code> for sub-tasks, or <code>parentId</code> for a task that exists.</td></tr>
+          <tr><td><code>draft_checklist</code><span class="tag">writes</span></td><td><code>work:draft</code></td><td>Sends a test plan as one draft with a check list.</td></tr>
+          <tr><td><code>list_drafts</code></td><td><code>work:draft</code></td><td>Lists the draft batches you sent.</td></tr>
+          <tr><td><code>get_draft</code></td><td><code>work:draft</code></td><td>Reads one draft batch, with the state of each draft.</td></tr>
+          <tr><td><code>add_comment</code><span class="tag">writes</span></td><td><code>work:comment</code></td><td>Writes a note on a task, marked as written through the key.</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<section class="act tint" id="tools">
+<section id="more" aria-labelledby="more-title">
   <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">Tools</div>
-      <h2>Eleven tools. <span class="thin">Offered by scope.</span></h2>
-      <p class="sub">At start the server calls <code>GET /api/v1/me</code> and offers only the tools whose scope the key has. <code>whoami</code> needs no scope. Every POST carries a new <code>Idempotency-Key</code>, so a repeated call does not make a second draft.</p>
-    </header>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Tools and their scopes">
-      <table class="stack">
-        <thead><tr><th>Tool</th><th>Scope</th><th>What it does</th></tr></thead>
-        <tbody>
-          <tr><td data-label="Tool"><code>whoami</code></td><td data-label="Scope"><span class="badge">none</span></td><td data-label="What it does">Shows the person, the key name, its scopes and its end date.</td></tr>
-          <tr><td data-label="Tool"><code>list_tasks</code></td><td data-label="Scope"><code>work:read</code></td><td data-label="What it does">Lists tasks (<code>scope</code> mine or team, <code>status</code>, <code>limit</code>, <code>category</code>, <code>parent_id</code> for sub-tasks).</td></tr>
-          <tr><td data-label="Tool"><code>get_task</code></td><td data-label="Scope"><code>work:read</code></td><td data-label="What it does">Reads one task with its steps, answers, notes, category, parent and sub-task count.</td></tr>
-          <tr><td data-label="Tool"><code>list_templates</code></td><td data-label="Scope"><code>work:read</code></td><td data-label="What it does">Lists the published task templates, with their category.</td></tr>
-          <tr><td data-label="Tool"><code>list_categories</code></td><td data-label="Scope"><code>work:read</code></td><td data-label="What it does">Lists the task categories the portal offers.</td></tr>
-          <tr><td data-label="Tool"><code>get_check_results</code></td><td data-label="Scope"><code>checks:read</code></td><td data-label="What it does">Reads the test runs and skips of a check list task. File names only.</td></tr>
-          <tr><td data-label="Tool"><code>add_comment</code> <span class="badge write">write</span></td><td data-label="Scope"><code>work:comment</code></td><td data-label="What it does">Writes a note on a task. The note is marked as written through the key.</td></tr>
-          <tr><td data-label="Tool"><code>draft_tasks</code> <span class="badge write">write</span></td><td data-label="Scope"><code>work:draft</code></td><td data-label="What it does">Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks.</td></tr>
-          <tr><td data-label="Tool"><code>draft_checklist</code> <span class="badge write">write</span></td><td data-label="Scope"><code>work:draft</code></td><td data-label="What it does">Sends a test plan (plan JSON) as one draft with a check list.</td></tr>
-          <tr><td data-label="Tool"><code>list_drafts</code></td><td data-label="Scope"><code>work:draft</code></td><td data-label="What it does">Lists the draft batches you sent.</td></tr>
-          <tr><td data-label="Tool"><code>get_draft</code></td><td data-label="Scope"><code>work:draft</code></td><td data-label="What it does">Reads one draft batch, with the state, category and parent of each draft.</td></tr>
-        </tbody>
-      </table>
+    <div class="head">
+      <h2 id="more-title">Reference</h2>
     </div>
-    <div class="grid g2">
-      <div class="card is-surface">
-        <div class="tag">draft_tasks</div>
-        <h3>A main task with sub-tasks</h3>
-        <p>Each draft takes <code>title</code>, and optionally <code>templateKey</code> or <code>body</code>, <code>notes</code>, <code>priority</code>, <code>dueAt</code>, <code>category</code> and <code>doneWhen</code> (lines). Give the main task a <code>ref</code>. Each sub-task names it in <code>parentRef</code> and comes after it in the list. Or use <code>parentId</code> to hang a draft under a task that already exists.</p>
+    <div class="ref">
+      <div>
+        <h3>Prompts</h3>
+        <dl>
+          <dt><code>write_test_plan</code></dt>
+          <dd>Explains the plan format and the writing rules, then the agent sends the plan with <code>draft_checklist</code>. Optional subject.</dd>
+          <dt><code>plan_growth_work</code></dt>
+          <dd>Plans business work as main tasks with sub-tasks, each with one result and a "done when" a reviewer can check. Optional goal and category.</dd>
+        </dl>
+        <h3 style="margin-top: var(--s6)">Settings</h3>
+        <dl>
+          <dt><code>COB_PORTAL_URL</code> <span style="color:var(--ink-3);font-weight:400">needed</span></dt>
+          <dd>The portal address, as the Profile page shows it. Https only.</dd>
+          <dt><code>COB_PORTAL_KEY</code> <span style="color:var(--ink-3);font-weight:400">needed</span></dt>
+          <dd>Your key. It starts with <code>cob_</code>.</dd>
+          <dt><code>COB_PORTAL_TIMEOUT_MS</code> <span style="color:var(--ink-3);font-weight:400">optional</span></dt>
+          <dd>How long to wait for one answer. 30000 by default, at least 1000.</dd>
+        </dl>
       </div>
-      <div class="card is-surface">
-        <div class="tag">On approval</div>
-        <h3>The tree stays</h3>
-        <p>A sub-task takes its main task's category when it has none. When the admin approves the batch, the main tasks go to the person or pool the admin picks. The sub-tasks can wait, so the admin gives each one later.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="act" id="scopes">
-  <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">Scopes</div>
-      <h2>Four scopes. <span class="thin">Choose the least.</span></h2>
-      <p class="sub">Choose the scopes when you make the key. A key acts as you, cut down to its scopes. It never has more rights than you.</p>
-    </header>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Scopes">
-      <table class="stack">
-        <thead><tr><th>Scope</th><th>What it allows</th></tr></thead>
-        <tbody>
-          <tr><td data-label="Scope"><code>work:read</code></td><td data-label="What it allows">Read tasks, task templates and task categories.</td></tr>
-          <tr><td data-label="Scope"><code>work:draft</code></td><td data-label="What it allows">Send draft tasks and check lists for approval. Read your draft batches.</td></tr>
-          <tr><td data-label="Scope"><code>work:comment</code></td><td data-label="What it allows">Write notes on tasks.</td></tr>
-          <tr><td data-label="Scope"><code>checks:read</code></td><td data-label="What it allows">Read check list results.</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="host"><b>When a call fails,</b> the agent gets the portal's error code, its message and every <code>details</code> path. <code>401</code>: the key is wrong, ended or revoked, so make a new key. <code>403</code>: the key lacks a scope, so make a new key with the scope. <code>429</code>: too many calls, so wait a minute.</p>
-  </div>
-</section>
-
-<section class="act tint" id="prompts">
-  <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">Prompts</div>
-      <h2>Two prompts <span class="thin">that teach the format.</span></h2>
-      <p class="sub">Each draft waits for a person to approve it in the portal.</p>
-    </header>
-    <div class="grid g2">
-      <div class="card is-surface">
-        <div class="tag">Prompt</div>
-        <h3><code>write_test_plan</code></h3>
-        <p>Optional <code>subject</code>. It explains the plan JSON format (areas, cases, id, title, priority, device <code>phone|laptop|both</code>, url, preconditions, steps, expected, screenshot) and the writing rules. Then the agent sends the plan with <code>draft_checklist</code>.</p>
-      </div>
-      <div class="card is-surface">
-        <div class="tag">Prompt</div>
-        <h3><code>plan_growth_work</code></h3>
-        <p>Optional <code>goal</code> and <code>category</code>. It explains how to plan business work as main tasks with sub-tasks, in the portal's words. One result per task, "What to hand in" in the notes, a <code>doneWhen</code> a reviewer can check, numbers as starting values. Then the agent sends it with <code>draft_tasks</code>.</p>
+      <div>
+        <h3>When a call fails</h3>
+        <dl>
+          <dt>401: the key was not accepted</dt>
+          <dd>It is wrong, ended or revoked. Make a new key on the Profile page.</dd>
+          <dt>403: not allowed</dt>
+          <dd>The key lacks a scope, or you lack the right. Make a key with the scope.</dd>
+          <dt>429: too many calls</dt>
+          <dd>Wait a minute, then try again.</dd>
+        </dl>
+        <h3 style="margin-top: var(--s6)">Other ways to run it</h3>
+        <dl>
+          <dt>Stay on one version</dt>
+          <dd>Write <code>cob-portal-mcp@0.2.1</code> in place of <code>cob-portal-mcp</code>.</dd>
+          <dt>Straight from GitHub</dt>
+          <dd>Write <code>github:callobuzz/cob-portal-mcp</code>. The built files are in the repository, so nothing is built on your computer.</dd>
+          <dt>A folder copy</dt>
+          <dd>Clone the repository and run <code>node &lt;folder&gt;/dist/cli.js</code>. On Windows, write the path with forward slashes.</dd>
+        </dl>
       </div>
     </div>
   </div>
 </section>
 
-<section class="act" id="faq">
+<section id="faq" aria-labelledby="faq-title">
   <div class="wrap">
-    <header class="sec-head">
-      <div class="kicker">FAQ</div>
-      <h2>Honest answers.</h2>
-      <p class="sub">Short answers to the questions people ask first.</p>
-    </header>
+    <div class="head">
+      <h2 id="faq-title">Questions</h2>
+    </div>
     <div class="faq">
-      <details>
-        <summary>Can I use it without a portal account?</summary>
-        <p>No. The server is a client of the Call O Buzz portal API. It needs a portal address and a personal key from a real account. There is no hosted fallback.</p>
-      </details>
-      <details>
-        <summary>Can the agent approve its own drafts?</summary>
-        <p>No. The agent can only make drafts and notes. A person must approve every draft in the portal, and that person decides who gets the task.</p>
-      </details>
-      <details>
-        <summary>Where does my key go?</summary>
-        <p>The server sends the key to the portal as an <code>Authorization: Bearer</code> header and nowhere else. It never writes the key to a log, an error or a URL. Keep the key out of files you commit.</p>
-      </details>
-      <details>
-        <summary>How do I stop an agent?</summary>
-        <p>Open the portal Profile page and revoke the key. It stops working at once. Make a new key when you want to start again.</p>
-      </details>
-      <details>
-        <summary>Why do I see fewer tools than the table shows?</summary>
-        <p>The server offers only the tools whose scope the key has. Make a new key with the scope you need. <code>whoami</code> shows the scopes of the key you use.</p>
-      </details>
-      <details>
-        <summary>Does a repeated call make a second draft?</summary>
-        <p>No. Every POST carries a new <code>Idempotency-Key</code> for each tool call, so a repeated call does not make a second draft.</p>
-      </details>
-      <details>
-        <summary>How do I report a vulnerability?</summary>
-        <p>Do not open a public issue. Follow <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">SECURITY.md</a>.</p>
-      </details>
+      <details><summary>Do I need a portal account?</summary><p>Yes. The server works only with the Call O Buzz portal. You need an account with two-step sign-in, the right to make API keys, and the portal address. There is no hosted version.</p></details>
+      <details><summary>Can the agent approve its own drafts?</summary><p>No. It can only make drafts and notes. A person approves every draft in the portal and decides who gets the task.</p></details>
+      <details><summary>Where does my key go?</summary><p>Only to the portal address you set, in the <code>Authorization</code> header. Keep it out of files you commit, and revoke it on the Profile page if a laptop is lost.</p></details>
+      <details><summary>Why does my agent see fewer tools than this page lists?</summary><p>The key lacks a scope. Run <code>whoami</code> to see the key's scopes, then make a new key with the scope you need.</p></details>
+      <details><summary>Can I add features or send code?</summary><p>Code contributions are by invitation, because the server follows one private portal. Bug reports are welcome as <a href="https://github.com/callobuzz/cob-portal-mcp/issues">GitHub issues</a>.</p></details>
+      <details><summary>How do I report a security problem?</summary><p>Do not open a public issue. Follow <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">SECURITY.md</a>.</p></details>
     </div>
   </div>
 </section>
@@ -542,55 +434,66 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
 
 <footer>
   <div class="wrap">
-    <div class="final">
-      <div class="kicker">Open source · MIT</div>
-      <h2>Agents draft. <span class="thin">People approve.</span></h2>
-      <p class="sub">MIT licence. Copyright 2026 Callobuzz. Built by <a href="https://callobuzz.com">Call O Buzz Services</a>.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://github.com/callobuzz/cob-portal-mcp">Star on GitHub</a>
-        <a class="btn btn-ghost" href="https://callobuzz.com/open-source">More Callobuzz open source</a>
-      </div>
-    </div>
-    <div class="foot-meta">
-      <div><a href="https://callobuzz.com">Callobuzz</a> · MIT</div>
-      <div class="foot-links">
-        <a href="https://github.com/callobuzz/cob-portal-mcp">GitHub</a>
-        <a href="https://www.npmjs.com/package/cob-portal-mcp">npm</a>
-        <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/LICENSE">Licence</a>
-        <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/CHANGELOG.md">Changelog</a>
-        <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">Security</a>
-      </div>
-    </div>
+    <p>MIT licence. Built by <a href="https://callobuzz.com">Call O Buzz Services</a>.</p>
+    <nav aria-label="Project links">
+      <a href="https://github.com/callobuzz/cob-portal-mcp">GitHub</a>
+      <a href="https://www.npmjs.com/package/cob-portal-mcp">npm</a>
+      <a href="https://github.com/callobuzz/cob-portal-mcp/releases">Releases</a>
+      <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/callobuzz/cob-portal-mcp/blob/main/SECURITY.md">Security</a>
+      <a href="https://callobuzz.com/open-source">More Callobuzz open source</a>
+    </nav>
   </div>
 </footer>
 
 <script>
 (function () {
-  var btn = document.querySelector('.copy');
-  if (btn) {
-    btn.addEventListener('click', function () {
-      var text = btn.getAttribute('data-copy');
-      var done = function () {
-        btn.textContent = 'Copied';
-        setTimeout(function () { btn.textContent = 'Copy'; }, 1800);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(done, function () {});
+  // Tabs: Claude Code or Claude Desktop. Without script both panels show, one under the other.
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function pick(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { pick(t, false); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        pick(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true);
       }
     });
-  }
+  });
+  if (tabs.length) pick(tabs[0], false);
+
+  // Copy: the text of the block, without the comment line.
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.closest('.code').querySelector('pre').innerText;
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+      });
+    });
+  });
+
+  // The section in view is marked in the top bar.
   if ('IntersectionObserver' in window) {
-    var links = document.querySelectorAll('nav .links a'), map = {};
-    for (var i = 0; i < links.length; i++) map[links[i].getAttribute('href').slice(1)] = links[i];
+    var links = {};
+    document.querySelectorAll('.bar nav a').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
-        for (var k in map) map[k].removeAttribute('aria-current');
-        if (map[e.target.id]) map[e.target.id].setAttribute('aria-current', 'true');
+        Object.keys(links).forEach(function (k) { links[k].removeAttribute('aria-current'); });
+        if (links[e.target.id]) links[e.target.id].setAttribute('aria-current', 'true');
       });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    var secs = document.querySelectorAll('main > section[id]');
-    for (var j = 0; j < secs.length; j++) io.observe(secs[j]);
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    document.querySelectorAll('main section[id]').forEach(function (s) { io.observe(s); });
   }
 })();
 </script>
