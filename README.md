@@ -1,15 +1,40 @@
 # cob-portal-mcp
 
-An MCP server for the Call O Buzz portal. It lets an AI agent (Claude Code, Claude Desktop, or any MCP client) read tasks and
-send **drafts** and **notes** to the portal. It runs on your computer and talks to the portal API with a personal API key.
+**[Website](https://callobuzz.github.io/cob-portal-mcp)** · **[Call O Buzz portal](https://portal.callobuzz.com)** · **[Callobuzz open source](https://callobuzz.com/open-source)** · **[Changelog](./CHANGELOG.md)**
 
-> **Safety note.** The agent can only make drafts and comments. It cannot assign work, approve a draft, change a task, pay,
-> send mail or delete anything. A person must approve every draft in the portal before it becomes a task, and that person
-> decides who gets it. Every note it writes is marked as written through the key.
+[![build](https://img.shields.io/github/actions/workflow/status/callobuzz/cob-portal-mcp/ci.yml?branch=main)](https://github.com/callobuzz/cob-portal-mcp/actions)
+[![release](https://img.shields.io/github/v/release/callobuzz/cob-portal-mcp?color=blue)](https://github.com/callobuzz/cob-portal-mcp/releases)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![GitHub stars](https://img.shields.io/github/stars/callobuzz/cob-portal-mcp?style=social)](https://github.com/callobuzz/cob-portal-mcp)
+
+**An MCP server for the Call O Buzz portal.** It lets an AI agent (Claude Code, Claude Desktop, or any MCP client) read
+tasks and send **drafts** and **notes** to the portal. It runs on your computer and talks to the portal API with a personal
+API key.
+
+> [!IMPORTANT]
+> **The agent can only make drafts and notes.** It cannot assign work, approve a draft, change a task, pay, send mail or
+> delete anything. A person must approve every draft in the portal before it becomes a task, and that person decides who
+> gets it. Every note it writes is marked as written through the key.
+
+## Why
+
+A good agent can plan work, write a test plan or break a goal into tasks. The portal is where a team tracks that work. This
+server connects the two, and keeps a person in charge:
+
+- **The agent reads.** It lists tasks, templates and categories, and reads one task with its steps, answers and notes.
+- **The agent proposes.** It sends draft tasks (a main task with sub-tasks) or a test plan as a check list draft.
+- **A person decides.** The drafts wait in the portal. A person approves, rejects and assigns them.
+- **The key sets the reach.** The server offers only the tools that the scopes of the key allow.
+
+## Prerequisites
+
+- **Node.js 22 or newer.**
+- **A portal account** with two-step sign-in (2FA) on, at [portal.callobuzz.com](https://portal.callobuzz.com).
+- **A personal API key** from the portal (see [Make a key](#make-a-key)).
 
 ## Install in one command
-
-The live portal is at `https://portal.callobuzz.com`. You need Node.js 22 or newer.
 
 1. Make a key (see [Make a key](#make-a-key)). Copy it.
 2. Add the server to your AI agent. npx downloads it from GitHub and starts it. Nothing is built on your computer.
@@ -49,9 +74,8 @@ The portal's Profile page shows this block with your new key and the portal addr
 Notes:
 
 - To stay on one version, add a tag: `github:callobuzz/cob-portal-mcp#v0.2.0`.
-- While the GitHub repository is private, the computer needs git access to it (the same access `git clone` uses).
-- Without GitHub access, use a folder copy: `node /path/to/cob-portal-mcp/dist/cli.js` in place of `npx -y ...`. On Windows
-  write the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
+- To use a folder copy, clone the repository and write `node <path>/dist/cli.js` in place of `npx -y ...`. On Windows write
+  the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
 
 Why it works with no build: the built files in `dist/` are committed, and `bin` points at `dist/cli.js`. npx installs the two
 runtime packages (`@modelcontextprotocol/sdk`, `zod`) and runs it. There is no `prepare` script, so an install never needs
@@ -134,6 +158,17 @@ When the portal refuses a call, the agent gets the portal's error code, its mess
 - `403`: the key lacks a scope, or you lack the right. Make a new key with the scope.
 - `429`: too many calls. Wait a minute.
 
+## Security model
+
+- **It runs on your computer.** The server is a local program. The agent talks to it over stdio, and it talks to the portal.
+- **The key stays in the header.** The server sends the key only as an `Authorization: Bearer` header. It never writes the
+  key to a log, an error or a URL.
+- **The key acts as you, cut to its scopes.** A key never has more rights than the person who made it.
+- **The agent can only make drafts and notes.** It cannot approve, assign, change a task, pay, send mail or delete.
+- **A person approves every draft.** Nothing becomes a task until a person approves it in the portal.
+- **You can revoke a key at any time.** Open the portal Profile page and revoke the key. It stops working at once.
+- **Report a vulnerability in private.** Follow [SECURITY.md](./SECURITY.md). Do not open a public issue.
+
 ## Develop
 
 ```bash
@@ -146,11 +181,21 @@ pnpm check:dist    # builds and fails when dist/ differs from the commit
 COB_PORTAL_URL=... COB_PORTAL_KEY=... pnpm test:integration   # real portal, read-only; skips when unset
 ```
 
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 ### Release
 
 1. Change the code and the tests. Bump `version` in `package.json` and `VERSION` in `src/core.ts`.
 2. `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
 3. Commit the source and `dist/` together. `pnpm check:dist` must pass after the commit.
-4. Tag the commit `v<version>` so people can pin it.
+4. Tag the commit `v<version>` and push the tag, so people can pin it.
 
 This package does not depend on `cob-mcp-cli-kit`, as `cob-rag-mcp` does not. It uses the MCP SDK directly.
+
+## Changelog
+
+[CHANGELOG.md](./CHANGELOG.md)
+
+## Licence
+
+[MIT](./LICENSE). Copyright 2026 Callobuzz. Built by [Call O Buzz Services](https://callobuzz.com).

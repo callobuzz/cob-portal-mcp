@@ -1,0 +1,66 @@
+# CI: lint, typecheck, test, build and the committed dist/ check on every push to main and every PR targeting main.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, Typecheck, Test, Build (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup pnpm
+        # Version comes from packageManager in package.json.
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      # npx github:callobuzz/cob-portal-mcp runs the committed dist/cli.js, so dist/ must match the source.
+      - name: Build and check the committed dist/
+        run: pnpm check:dist
+
+      - name: Smoke test the CLI
+        # With no settings it must stop at once with a plain message, not hang or crash.
+        shell: bash
+        run: |
+          set +e
+          out="$(node dist/cli.js < /dev/null 2>&1)"; code=$?
+          echo "$out"
+          [ "$code" -ne 0 ] && echo "$out" | grep -q "COB_PORTAL_URL"

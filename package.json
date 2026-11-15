@@ -25,7 +25,14 @@
 		"typecheck": "tsc --noEmit",
 		"check:dist": "tsup && git diff --exit-code -- dist"
 	},
-	"repository": "github:callobuzz/cob-portal-mcp",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/callobuzz/cob-portal-mcp.git"
+	},
+	"homepage": "https://callobuzz.github.io/cob-portal-mcp",
+	"bugs": {
+		"url": "https://github.com/callobuzz/cob-portal-mcp/issues"
+	},
 	"keywords": [
 		"mcp",
 		"model-context-protocol",
@@ -34,11 +41,12 @@
 		"portal"
 	],
 	"author": "COB (https://github.com/callobuzz)",
-	"license": "UNLICENSED",
+	"license": "MIT",
 	"private": true,
 	"files": [
 		"dist",
-		"README.md"
+		"README.md",
+		"LICENSE"
 	],
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.31.0",

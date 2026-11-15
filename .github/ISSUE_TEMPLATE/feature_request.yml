@@ -1,0 +1,20 @@
+name: Feature request
+description: A tool, a prompt or an option you would like
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The server only reads, comments and drafts. Approving, assigning, paying, mailing and deleting stay with a person in the portal.
+  - type: textarea
+    id: need
+    attributes:
+      label: What you want to do
+      description: The task, and the agent you want to do it from.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: The tool or prompt, its inputs, and the portal data it would read or draft.

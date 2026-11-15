@@ -1,0 +1,35 @@
+name: Bug report
+description: A tool or a prompt does not work as the README says
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report a security problem here. Follow SECURITY.md instead. Never paste your key.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you asked the agent, what you expected, and what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it
+      description: The MCP client (Claude Code, Claude Desktop, another) and the tool call it made.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "The tag you installed (for example v0.2.0) and your Node.js version."
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error text
+      description: "The error the tool gave, with its code. Remove keys and personal data first."
+      render: text

@@ -5,13 +5,13 @@ import { loadConfig, type Me, PortalClient } from "./core.js";
 import { createServer } from "./server.js";
 import { ALL_TOOLS, visibleTools } from "./tools.js";
 
-const KEY = "cob_secretvalue123456";
+const KEY = "cob_test_key_not_real";
 const ID = "11111111-1111-4111-8111-111111111111";
 
 function meWith(scopes: string[]): Me {
 	return {
 		person: { name: "Asha", email: "asha@example.com" },
-		key: { name: "agent", prefix: "cob_secret", scopes, expires_at: "2027-01-01T00:00:00Z" },
+		key: { name: "agent", prefix: "cob_test_k", scopes, expires_at: "2027-01-01T00:00:00Z" },
 	};
 }
 
