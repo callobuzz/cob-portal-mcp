@@ -23,7 +23,8 @@
 		"lint": "biome check .",
 		"lint:fix": "biome check --fix .",
 		"typecheck": "tsc --noEmit",
-		"check:dist": "tsup && git diff --exit-code -- dist"
+		"check:dist": "tsup && git diff --exit-code -- dist",
+		"prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm check:dist"
 	},
 	"repository": {
 		"type": "git",
@@ -38,11 +39,15 @@
 		"model-context-protocol",
 		"ai-agents",
 		"call-o-buzz",
+		"callobuzz",
+		"cob",
 		"portal"
 	],
 	"author": "COB (https://github.com/callobuzz)",
 	"license": "MIT",
-	"private": true,
+	"publishConfig": {
+		"access": "public"
+	},
 	"files": [
 		"dist",
 		"README.md",

@@ -4,6 +4,7 @@
 
 [![build](https://img.shields.io/github/actions/workflow/status/callobuzz/cob-portal-mcp/ci.yml?branch=main)](https://github.com/callobuzz/cob-portal-mcp/actions)
 [![release](https://img.shields.io/github/v/release/callobuzz/cob-portal-mcp?color=blue)](https://github.com/callobuzz/cob-portal-mcp/releases)
+[![npm](https://img.shields.io/npm/v/cob-portal-mcp?color=blue)](https://www.npmjs.com/package/cob-portal-mcp)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -37,7 +38,7 @@ server connects the two, and keeps a person in charge:
 ## Install in one command
 
 1. Make a key (see [Make a key](#make-a-key)). Copy it.
-2. Add the server to your AI agent. npx downloads it from GitHub and starts it. Nothing is built on your computer.
+2. Add the server to your AI agent. npx downloads it from npm and starts it. Nothing is built on your computer.
 
 ### Claude Code
 
@@ -45,7 +46,7 @@ server connects the two, and keeps a person in charge:
 claude mcp add cob-portal \
   --env COB_PORTAL_URL=https://portal.callobuzz.com \
   --env COB_PORTAL_KEY=cob_your_key_here \
-  -- npx -y github:callobuzz/cob-portal-mcp
+  -- npx -y cob-portal-mcp
 ```
 
 ### Claude Desktop
@@ -57,7 +58,7 @@ Add this to `claude_desktop_config.json`, then restart Claude Desktop:
 	"mcpServers": {
 		"cob-portal": {
 			"command": "npx",
-			"args": ["-y", "github:callobuzz/cob-portal-mcp"],
+			"args": ["-y", "cob-portal-mcp"],
 			"env": {
 				"COB_PORTAL_URL": "https://portal.callobuzz.com",
 				"COB_PORTAL_KEY": "cob_your_key_here"
@@ -73,13 +74,14 @@ The portal's Profile page shows this block with your new key and the portal addr
 
 Notes:
 
-- To stay on one version, add a tag: `github:callobuzz/cob-portal-mcp#v0.2.0`.
+- To stay on one version, add it: `cob-portal-mcp@0.2.0`.
+- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.2.0` for one version).
 - To use a folder copy, clone the repository and write `node <path>/dist/cli.js` in place of `npx -y ...`. On Windows write
   the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
 
-Why it works with no build: the built files in `dist/` are committed, and `bin` points at `dist/cli.js`. npx installs the two
-runtime packages (`@modelcontextprotocol/sdk`, `zod`) and runs it. There is no `prepare` script, so an install never needs
-the build tools.
+Why it works with no build: the built files in `dist/` are in the npm package and committed to the repository, and `bin`
+points at `dist/cli.js`. npx installs the two runtime packages (`@modelcontextprotocol/sdk`, `zod`) and runs it. There is no
+`prepare` script, so an install never needs the build tools.
 
 ## Settings
 

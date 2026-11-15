@@ -287,11 +287,12 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       <h1>Let your agent draft the work. <span class="thin">A person approves it.</span></h1>
       <p class="lede">cob-portal-mcp is an MCP server for the <a href="https://portal.callobuzz.com">Call O Buzz portal</a>. An AI agent reads tasks and sends drafts and notes. It cannot assign, approve, pay, send mail or delete. It runs on your computer with a personal API key.</p>
       <div class="cmdbox">
-        <pre id="install-cmd" tabindex="0" aria-label="Install command"><span class="k">npx</span> -y github:callobuzz/cob-portal-mcp</pre>
-        <button class="copy" type="button" data-copy="npx -y github:callobuzz/cob-portal-mcp" aria-label="Copy the install command">Copy</button>
+        <pre id="install-cmd" tabindex="0" aria-label="Install command"><span class="k">npx</span> -y cob-portal-mcp</pre>
+        <button class="copy" type="button" data-copy="npx -y cob-portal-mcp" aria-label="Copy the install command">Copy</button>
       </div>
       <div class="cta">
         <a class="btn btn-primary" href="https://github.com/callobuzz/cob-portal-mcp">View on GitHub</a>
+        <a class="btn btn-ghost" href="https://www.npmjs.com/package/cob-portal-mcp">View on npm</a>
         <a class="btn btn-ghost" href="https://portal.callobuzz.com">Open the portal</a>
       </div>
       <ul class="chips pill-row" aria-label="At a glance">
@@ -351,7 +352,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
     <header class="sec-head">
       <div class="kicker">Install</div>
       <h2>Make a key. <span class="thin">Add the server.</span></h2>
-      <p class="sub">You need Node.js 22 or newer. npx downloads the server from GitHub and starts it. Nothing is built on your computer.</p>
+      <p class="sub">You need Node.js 22 or newer. npx downloads the server from npm and starts it. Nothing is built on your computer.</p>
     </header>
     <ol class="steps">
       <li>
@@ -373,8 +374,8 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
 <pre tabindex="0"><span class="k">claude</span> mcp add cob-portal \
   --env COB_PORTAL_URL=https://portal.callobuzz.com \
   --env COB_PORTAL_KEY=cob_your_key_here \
-  -- npx -y github:callobuzz/cob-portal-mcp</pre>
-        <p>To stay on one version, add a tag: <code>github:callobuzz/cob-portal-mcp#v0.2.0</code>.</p>
+  -- npx -y cob-portal-mcp</pre>
+        <p>To stay on one version, write <code>cob-portal-mcp@0.2.0</code>. To run it straight from GitHub, write <code>github:callobuzz/cob-portal-mcp</code>.</p>
       </div>
       <div class="snip">
         <div class="label"><h3>Claude Desktop</h3><span class="where">claude_desktop_config.json</span></div>
@@ -382,7 +383,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
   "mcpServers": {
     "cob-portal": {
       "command": "npx",
-      "args": ["-y", "github:callobuzz/cob-portal-mcp"],
+      "args": ["-y", "cob-portal-mcp"],
       "env": {
         "COB_PORTAL_URL": "https://portal.callobuzz.com",
         "COB_PORTAL_KEY": "cob_your_key_here"
@@ -398,7 +399,7 @@ footer .foot-links{display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--sp
       </div>
       <div class="snip">
         <div class="label"><h3>Why it needs no build</h3></div>
-        <p>The built files in <code>dist/</code> are committed, and <code>bin</code> points at <code>dist/cli.js</code>. npx installs the two runtime packages (<code>@modelcontextprotocol/sdk</code>, <code>zod</code>) and runs it. There is no <code>prepare</code> script.</p>
+        <p>The built files in <code>dist/</code> are in the npm package and committed to the repository, and <code>bin</code> points at <code>dist/cli.js</code>. npx installs the two runtime packages (<code>@modelcontextprotocol/sdk</code>, <code>zod</code>) and runs it. There is no <code>prepare</code> script.</p>
       </div>
     </div>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Settings">

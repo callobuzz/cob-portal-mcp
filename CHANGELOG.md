@@ -12,10 +12,11 @@ The first public release.
 
 ### Changed
 
-- **Licence: MIT.** The repository is public. Install it with `npx -y github:callobuzz/cob-portal-mcp`,
-  or pin a version with `#v0.2.0`. Earlier versions were private.
-- Install in one command: `dist/` is committed and `bin` points at `dist/cli.js`, so npx runs it with
-  no build step.
+- **Licence: MIT.** The repository is public, and the package is on npm. Install it with
+  `npx -y cob-portal-mcp`, or pin a version with `cob-portal-mcp@0.2.0`. `npx -y github:callobuzz/cob-portal-mcp`
+  also works. Earlier versions were private.
+- Install in one command: `dist/` is in the package and committed, and `bin` points at `dist/cli.js`, so npx runs it
+  with no build step. `prepublishOnly` runs lint, the type check, the tests and `check:dist` before a publish.
 
 ### Security
 

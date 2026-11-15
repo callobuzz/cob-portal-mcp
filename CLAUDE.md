@@ -8,10 +8,12 @@ This file guides Claude Code in this repository. Read it first in every session.
 (Claude Code, Claude Desktop, any MCP client) read tasks and send **drafts** and **notes** to the portal, with a
 personal API key. It runs on the user's computer over stdio and calls the portal's HTTP API.
 
-- Version 0.2.0. Licence MIT, Copyright 2026 Callobuzz. Public repository `callobuzz/cob-portal-mcp` (to be created).
-- Install: `npx -y github:callobuzz/cob-portal-mcp` (pin `#v0.2.0`). `dist/` is committed and `bin` points at
-  `dist/cli.js`, so npx runs it with no build. There is no `prepare` script on purpose.
-- `"private": true` stays in `package.json`: it blocks an accidental `npm publish`. npx from GitHub still works.
+- Version 0.2.0. Licence MIT, Copyright 2026 Callobuzz. Public repository `callobuzz/cob-portal-mcp` and npm package
+  `cob-portal-mcp` (both to be created by SV, GO-LIVE step 17.2 in the website repo).
+- Install: `npx -y cob-portal-mcp` from npm (pin `cob-portal-mcp@0.2.0`); `npx -y github:callobuzz/cob-portal-mcp`
+  also works. `dist/` is in the package and committed, and `bin` points at `dist/cli.js`, so npx runs it with no build.
+  There is no `prepare` script on purpose.
+- `prepublishOnly` runs lint, type check, tests and `check:dist`, so `npm publish` refuses a stale `dist/`.
 - User docs: `README.md`. Landing page: `docs/index.html` (GitHub Pages, `.github/workflows/pages.yml`).
   History: `CHANGELOG.md` (Keep a Changelog). Policy: `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`.
 
@@ -89,8 +91,9 @@ Run the server by hand: `node dist/cli.js` with the two variables set. With none
 1. Bump `version` in `package.json` and `VERSION` in `src/core.ts`. Move `[Unreleased]` to the new version in `CHANGELOG.md`.
 2. `pnpm lint && pnpm typecheck && pnpm test && pnpm build`, then commit source and `dist/` together.
 3. `pnpm check:dist` passes on the commit. Tag it `v<version>`.
-4. SV pushes the branch and the tag. In the portal, Settings, `api.mcp_package` can pin the tag
-   (`github:callobuzz/cob-portal-mcp#v<version>`).
+4. SV pushes the branch and the tag, makes the GitHub release, and runs `npm publish`. The exact commands are in the
+   website repo, `deploy/GO-LIVE.html`, step 17.2. In the portal, Settings, `api.mcp_package` can pin a version
+   (`cob-portal-mcp@<version>`).
 
 ## Working rules (SV)
 
@@ -111,15 +114,11 @@ starts, calls `/api/v1/me`, and refuses a wrong key with the plain message.
 
 Next, in order:
 
-1. **Publish (SV).** Create the public repo `callobuzz/cob-portal-mcp` on GitHub (no README, no licence: they are
-   here). Then in this folder:
-   `git remote add origin git@github.com:callobuzz/cob-portal-mcp.git && git push -u origin main && git push origin v0.2.0`.
-   Turn on Pages: Settings, Pages, Source "GitHub Actions". Turn on Private vulnerability reporting: Settings,
-   Code security.
-2. **Check the install from GitHub** on a clean shell: `npx -y github:callobuzz/cob-portal-mcp` with a fake key must
-   print the 401 message. Then the portal's "Copy MCP setup" works as it is.
-3. **Claude Code on SV's laptop** (needs SV's key, SV runs it): see the website repo, `deploy/GO-LIVE.html`, step 17.1.
-   After publishing, the `node J:/.../dist/cli.js` line there can become the npx line.
+1. **Publish (SV).** GitHub repo, push, Pages, security settings, release v0.2.0 and npm: the website repo,
+   `deploy/GO-LIVE.html`, step 17.2, in order. The release notes are `.github/release-notes/v0.2.0.md`.
+2. **Check the install** on a clean shell: `npx -y cob-portal-mcp` with a fake key must print the 401 message
+   (step 17.2 ends with it). The portal's "Copy MCP setup" uses the setting `api.mcp_package` (default `cob-portal-mcp`).
+3. **Claude Code on SV's laptop** (needs SV's key, SV runs it): the website repo, `deploy/GO-LIVE.html`, step 17.1.
 4. **Website showcase**: a page on `callobuzz.com/open-source` like the other COB MCP servers (website repo,
    `src/app/open-source/`), and a news post if SV wants one.
 5. **Ideas, not started** (ask SV before any): a `list_people` or team read for planning, a `get_template` tool, a
