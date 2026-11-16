@@ -5,7 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 // src/core.ts
 import { randomUUID } from "crypto";
-var VERSION = "0.2.1";
+var VERSION = "0.3.0";
 var DEFAULT_TIMEOUT_MS = 3e4;
 var PortalError = class extends Error {
   constructor(message, status) {
@@ -188,10 +188,33 @@ Call draft_tasks with:
       "doneWhen": ["Three case studies, three short videos and the page for US companies are live."]
     },
     {
+      "ref": "case-studies",
       "parentRef": "proof",
       "title": "Write three case studies",
-      "notes": "What to do. What to hand in: three case studies with screenshots.",
-      "doneWhen": ["Each case study has the problem, what we built, the result and three screenshots."]
+      "brief": {
+        "why": "A US buyer trusts real work before a first call.",
+        "handIn": "Links to the three case studies with screenshots."
+      },
+      "doneWhen": ["Each case study has the problem, what we built, the result and three screenshots."],
+      "steps": [
+        { "key": "read", "title": "Read the brief and the notes it links", "minutes": 5, "needs": [] },
+        { "key": "facts", "title": "Collect the facts and screenshots", "why": "Numbers make a case study real.",
+          "how": "1. Write the problem in the client's words.\\n2. Note the numbers: time saved, users, launch date.\\nTip: hide every real person's data.",
+          "minutes": 60, "needs": ["read"],
+          "fields": [{ "key": "shots", "label": "Link to the folder with the screenshots", "type": "text", "required": true }],
+          "checks": [{ "field": "shots", "startsWith": "https://", "message": "Paste the folder link." }] },
+        { "key": "write", "title": "Write the three case studies", "minutes": 120, "needs": ["facts"],
+          "fields": [{ "key": "links", "label": "Links to the three case studies", "type": "long_text", "required": true }],
+          "checks": [{ "field": "links", "links": 3, "message": "Add the three links." }] },
+        { "key": "self", "title": "Check your work against Done when", "minutes": 5, "needs": ["write"], "selfCheck": true }
+      ]
+    },
+    {
+      "parentRef": "proof",
+      "title": "Make the page for US companies",
+      "needsRefs": ["case-studies"],
+      "notes": "Build the page once the case studies are ready.",
+      "steps": [{ "title": "Write the words", "minutes": 60 }, { "title": "Build the page", "minutes": 90 }]
     }
   ]
 }
@@ -202,20 +225,24 @@ Rules for the batch:
 2. A sub-task takes its main task's category, so set category on the main task only.
 3. Use parentId instead of parentRef only to add a sub-task under a task that already exists (an id from list_tasks).
 4. Keep it inside the portal limit of drafts in one batch. Split a big plan into more batches.
+5. Give every sub-task a brief (why it matters, what to hand in) and steps. Each step has a title, a how with numbered
+   lines, the planned minutes, and the fields the person fills. Steps run in order; needs: [] lets a step run any time.
+6. A task that must wait for another names it: needsRefs with the other draft's ref, or needsIds with an existing task id.
+   Never make two tasks wait for each other.
 
 ## Writing rules
 
 1. Write in plain Indian English a new employee can follow. Short sentences. No em dashes, no jargon.
 2. Put one result in each task. A title starts with a verb for a sub-task ("Research", "Write", "Set up").
-3. In notes, say what to do and "What to hand in:" the research or output expected, such as a sheet of 30 named
-   companies with a reason for each.
+3. In the brief, say why the task matters and what to hand in, such as a sheet of 30 named companies with a reason for
+   each. In each step's how, say exactly what to do, where, and one tip.
 4. Make each doneWhen line something a reviewer can check: a count, a link, a file, a date. Never "done well".
 5. Keep numbers (counts, prices, per-week targets) as starting values the admin can change.
 
 ## After you send
 
 The portal answers with batch_id. The drafts wait on the admin's drafts page. If the portal lists problems, each has a
-path such as drafts[3].parentRef: fix those and send the whole batch again. Use get_draft to see what was approved.`;
+path such as drafts[3].parentRef or drafts[2].body.steps[3].needs: fix those and send the whole batch again. Use get_draft to see what was approved.`;
 }
 function testPlanPrompt(subject) {
   return `Write a test plan for a person to run by hand, then send it to the portal as a draft check list.
@@ -290,6 +317,18 @@ function readPlan(plan) {
     throw new PortalError("plan is text but not valid JSON. Send the plan as a JSON object with an areas list.");
   }
 }
+var leanStep = z.object({
+  key: z.string().regex(/^[a-z][a-z0-9_]*$/).optional().describe("Small letters, numbers and underscores. Left out: s1, s2 ..."),
+  title: z.string().min(1).describe("What the person does in this step."),
+  why: z.string().optional().describe("One line: why this step."),
+  how: z.string().optional().describe("How to do it: numbered lines (1. 2.), - lines and a Tip: line."),
+  minutes: z.number().int().min(0).max(1440).optional().describe("The planned minutes of the step."),
+  needs: z.array(z.string()).optional().describe("The step keys this step waits for. Left out: the step before. Empty: any time."),
+  confirm: z.boolean().optional().describe("The person presses Step done. A step with no fields gets it by itself."),
+  fields: z.array(z.record(z.string(), z.unknown())).optional().describe("Answer fields: key, label, type, required."),
+  checks: z.array(z.record(z.string(), z.unknown())).optional().describe("Hand-in checks: { field, atLeast | atMost | filled | files | links | startsWith, message }."),
+  selfCheck: z.boolean().optional().describe("The person ticks the Done when lines here.")
+}).strict();
 var draftTask = z.object({
   title: z.string().min(1).describe("The task title."),
   templateKey: z.string().optional().describe("The key of a published template (see list_templates). Use this or body."),
@@ -307,7 +346,19 @@ var draftTask = z.object({
   category: z.string().min(1).optional().describe(
     "One of the portal's task categories (see list_categories). Left out: the template's, else the parent's."
   ),
-  doneWhen: z.array(z.string().min(1)).max(20).optional().describe("What must be true when the task is done, one line each.")
+  doneWhen: z.array(z.string().min(1)).max(20).optional().describe("What must be true when the task is done, one line each."),
+  brief: z.object({
+    why: z.string().min(1).optional().describe("Why this matters."),
+    handIn: z.string().min(1).optional().describe("What the person hands in."),
+    doneWhen: z.array(z.string().min(1)).max(20).optional().describe("Used as the task's Done when if doneWhen is empty."),
+    readFirst: z.array(z.object({ label: z.string().min(1), url: z.string().min(1) }).strict()).max(20).optional().describe("Links to read before step 1.")
+  }).strict().optional().describe("The brief of a guided task: why it matters, what is handed in, Done when, links to read first."),
+  steps: z.array(leanStep).min(1).max(40).optional().describe(
+    "Guided steps. With steps, the portal builds the body and notes becomes the brief's why. Use steps, body or templateKey."
+  ),
+  needsRefs: z.array(z.string().min(1).max(60)).max(20).optional().describe("The refs of other drafts in this batch that this task waits for."),
+  needsIds: z.array(uuid).max(20).optional().describe("Ids of existing tasks in the team that this task waits for."),
+  askTo: z.enum(["giver", "reviewer"]).optional().describe("Who answers the person's questions on this task.")
 }).strict();
 var ALL_TOOLS = [
   def({
@@ -351,7 +402,7 @@ var ALL_TOOLS = [
   def({
     name: "get_task",
     title: "Get a task",
-    description: "Read one task: its steps, answers and notes.",
+    description: "Read one task: its brief, steps (state, planned and spent minutes), progress, what it waits for, answers and notes.",
     scope: "work:read",
     write: false,
     input: { task_id: uuid.describe("The task id from list_tasks.") },

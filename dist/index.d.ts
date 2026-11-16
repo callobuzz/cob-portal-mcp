@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Settings, the HTTP client and the error text. The key goes out only as an Authorization header.
  * It is never put in a URL, an error message or a log line.
  */
-declare const VERSION = "0.2.1";
+declare const VERSION = "0.3.0";
 declare class PortalError extends Error {
     readonly status?: number | undefined;
     constructor(message: string, status?: number | undefined);

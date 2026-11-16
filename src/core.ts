@@ -5,7 +5,7 @@
 
 import { randomUUID } from "node:crypto";
 
-export const VERSION = "0.2.1";
+export const VERSION = "0.3.0";
 export const DEFAULT_TIMEOUT_MS = 30_000;
 
 export class PortalError extends Error {

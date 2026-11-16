@@ -29,10 +29,33 @@ Call draft_tasks with:
       "doneWhen": ["Three case studies, three short videos and the page for US companies are live."]
     },
     {
+      "ref": "case-studies",
       "parentRef": "proof",
       "title": "Write three case studies",
-      "notes": "What to do. What to hand in: three case studies with screenshots.",
-      "doneWhen": ["Each case study has the problem, what we built, the result and three screenshots."]
+      "brief": {
+        "why": "A US buyer trusts real work before a first call.",
+        "handIn": "Links to the three case studies with screenshots."
+      },
+      "doneWhen": ["Each case study has the problem, what we built, the result and three screenshots."],
+      "steps": [
+        { "key": "read", "title": "Read the brief and the notes it links", "minutes": 5, "needs": [] },
+        { "key": "facts", "title": "Collect the facts and screenshots", "why": "Numbers make a case study real.",
+          "how": "1. Write the problem in the client's words.\\n2. Note the numbers: time saved, users, launch date.\\nTip: hide every real person's data.",
+          "minutes": 60, "needs": ["read"],
+          "fields": [{ "key": "shots", "label": "Link to the folder with the screenshots", "type": "text", "required": true }],
+          "checks": [{ "field": "shots", "startsWith": "https://", "message": "Paste the folder link." }] },
+        { "key": "write", "title": "Write the three case studies", "minutes": 120, "needs": ["facts"],
+          "fields": [{ "key": "links", "label": "Links to the three case studies", "type": "long_text", "required": true }],
+          "checks": [{ "field": "links", "links": 3, "message": "Add the three links." }] },
+        { "key": "self", "title": "Check your work against Done when", "minutes": 5, "needs": ["write"], "selfCheck": true }
+      ]
+    },
+    {
+      "parentRef": "proof",
+      "title": "Make the page for US companies",
+      "needsRefs": ["case-studies"],
+      "notes": "Build the page once the case studies are ready.",
+      "steps": [{ "title": "Write the words", "minutes": 60 }, { "title": "Build the page", "minutes": 90 }]
     }
   ]
 }
@@ -43,20 +66,24 @@ Rules for the batch:
 2. A sub-task takes its main task's category, so set category on the main task only.
 3. Use parentId instead of parentRef only to add a sub-task under a task that already exists (an id from list_tasks).
 4. Keep it inside the portal limit of drafts in one batch. Split a big plan into more batches.
+5. Give every sub-task a brief (why it matters, what to hand in) and steps. Each step has a title, a how with numbered
+   lines, the planned minutes, and the fields the person fills. Steps run in order; needs: [] lets a step run any time.
+6. A task that must wait for another names it: needsRefs with the other draft's ref, or needsIds with an existing task id.
+   Never make two tasks wait for each other.
 
 ## Writing rules
 
 1. Write in plain Indian English a new employee can follow. Short sentences. No em dashes, no jargon.
 2. Put one result in each task. A title starts with a verb for a sub-task ("Research", "Write", "Set up").
-3. In notes, say what to do and "What to hand in:" the research or output expected, such as a sheet of 30 named
-   companies with a reason for each.
+3. In the brief, say why the task matters and what to hand in, such as a sheet of 30 named companies with a reason for
+   each. In each step's how, say exactly what to do, where, and one tip.
 4. Make each doneWhen line something a reviewer can check: a count, a link, a file, a date. Never "done well".
 5. Keep numbers (counts, prices, per-week targets) as starting values the admin can change.
 
 ## After you send
 
 The portal answers with batch_id. The drafts wait on the admin's drafts page. If the portal lists problems, each has a
-path such as drafts[3].parentRef: fix those and send the whole batch again. Use get_draft to see what was approved.`;
+path such as drafts[3].parentRef or drafts[2].body.steps[3].needs: fix those and send the whole batch again. Use get_draft to see what was approved.`;
 }
 
 /** The text of the write_test_plan prompt: the plan JSON format and the rules for writing it. */

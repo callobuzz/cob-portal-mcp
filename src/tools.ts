@@ -39,6 +39,35 @@ function readPlan(plan: unknown): unknown {
 	}
 }
 
+/** A lean guided step. The portal checks the fields and checks with its own parser and names any problem by its path. */
+const leanStep = z
+	.object({
+		key: z
+			.string()
+			.regex(/^[a-z][a-z0-9_]*$/)
+			.optional()
+			.describe("Small letters, numbers and underscores. Left out: s1, s2 ..."),
+		title: z.string().min(1).describe("What the person does in this step."),
+		why: z.string().optional().describe("One line: why this step."),
+		how: z.string().optional().describe("How to do it: numbered lines (1. 2.), - lines and a Tip: line."),
+		minutes: z.number().int().min(0).max(1440).optional().describe("The planned minutes of the step."),
+		needs: z
+			.array(z.string())
+			.optional()
+			.describe("The step keys this step waits for. Left out: the step before. Empty: any time."),
+		confirm: z.boolean().optional().describe("The person presses Step done. A step with no fields gets it by itself."),
+		fields: z
+			.array(z.record(z.string(), z.unknown()))
+			.optional()
+			.describe("Answer fields: key, label, type, required."),
+		checks: z
+			.array(z.record(z.string(), z.unknown()))
+			.optional()
+			.describe("Hand-in checks: { field, atLeast | atMost | filled | files | links | startsWith, message }."),
+		selfCheck: z.boolean().optional().describe("The person ticks the Done when lines here."),
+	})
+	.strict();
+
 const draftTask = z
 	.object({
 		title: z.string().min(1).describe("The task title."),
@@ -82,6 +111,39 @@ const draftTask = z
 			.max(20)
 			.optional()
 			.describe("What must be true when the task is done, one line each."),
+		brief: z
+			.object({
+				why: z.string().min(1).optional().describe("Why this matters."),
+				handIn: z.string().min(1).optional().describe("What the person hands in."),
+				doneWhen: z
+					.array(z.string().min(1))
+					.max(20)
+					.optional()
+					.describe("Used as the task's Done when if doneWhen is empty."),
+				readFirst: z
+					.array(z.object({ label: z.string().min(1), url: z.string().min(1) }).strict())
+					.max(20)
+					.optional()
+					.describe("Links to read before step 1."),
+			})
+			.strict()
+			.optional()
+			.describe("The brief of a guided task: why it matters, what is handed in, Done when, links to read first."),
+		steps: z
+			.array(leanStep)
+			.min(1)
+			.max(40)
+			.optional()
+			.describe(
+				"Guided steps. With steps, the portal builds the body and notes becomes the brief's why. Use steps, body or templateKey.",
+			),
+		needsRefs: z
+			.array(z.string().min(1).max(60))
+			.max(20)
+			.optional()
+			.describe("The refs of other drafts in this batch that this task waits for."),
+		needsIds: z.array(uuid).max(20).optional().describe("Ids of existing tasks in the team that this task waits for."),
+		askTo: z.enum(["giver", "reviewer"]).optional().describe("Who answers the person's questions on this task."),
 	})
 	.strict();
 
@@ -136,7 +198,8 @@ export const ALL_TOOLS: AnyTool[] = [
 	def({
 		name: "get_task",
 		title: "Get a task",
-		description: "Read one task: its steps, answers and notes.",
+		description:
+			"Read one task: its brief, steps (state, planned and spent minutes), progress, what it waits for, answers and notes.",
 		scope: "work:read",
 		write: false,
 		input: { task_id: uuid.describe("The task id from list_tasks.") },

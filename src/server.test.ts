@@ -186,6 +186,45 @@ describe("requests", () => {
 		expect(JSON.parse(text(r))).toMatchObject({ batch_id: ID, status: "pending" });
 	});
 
+	it("sends a guided draft (brief, steps with how and minutes, needs) as it is", async () => {
+		const { client, calls } = await connect(["work:draft"], () => ({
+			status: 201,
+			json: { batch_id: ID, task_ids: [ID, ID], status: "pending" },
+		}));
+		const tasks = [
+			{
+				ref: "agencies",
+				title: "Research US agencies",
+				brief: { why: "Agencies give steady work.", handIn: "A sheet of 30 agencies." },
+				steps: [
+					{ key: "read", title: "Read the brief", minutes: 5, needs: [] },
+					{
+						key: "find",
+						title: "Find 30 agencies",
+						how: "1. Open Clutch.\n2. Filter by size.",
+						minutes: 45,
+						fields: [{ key: "rows", label: "How many agencies?", type: "number", required: true }],
+						checks: [{ field: "rows", atLeast: 30, message: "Step done needs 30 agencies." }],
+					},
+				],
+			},
+			{ title: "Write the offer ladder", needsRefs: ["agencies"], needsIds: [ID], askTo: "reviewer" },
+		];
+		const r = await client.callTool({ name: "draft_tasks", arguments: { title: "Guided", tasks } });
+		expect(r.isError).toBeFalsy();
+		expect((calls[0] as Call).body).toEqual({ title: "Guided", tasks });
+	});
+
+	it("refuses a guided step with an unknown key before any call", async () => {
+		const { client, calls } = await connect(["work:draft"]);
+		const r = await client.callTool({
+			name: "draft_tasks",
+			arguments: { title: "B", tasks: [{ title: "T", steps: [{ title: "S", assignee: "x" }] }] },
+		});
+		expect(r.isError).toBe(true);
+		expect(calls).toHaveLength(0);
+	});
+
 	it("refuses an unknown field on a draft before any call", async () => {
 		const { client, calls } = await connect(["work:draft"]);
 		const r = await client.callTool({
@@ -319,6 +358,12 @@ describe("prompt", () => {
 			"draft_tasks",
 			"list_categories",
 			"list_tasks",
+			"brief",
+			"steps",
+			"how",
+			"minutes",
+			"needsRefs",
+			"needsIds",
 		]) {
 			expect(t).toContain(word);
 		}
