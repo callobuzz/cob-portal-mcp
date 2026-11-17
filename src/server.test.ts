@@ -54,6 +54,7 @@ const CHANGE_READ = [
 	"read_people",
 	"read_rounds",
 	"read_leave_types",
+	"read_leave_policies",
 	"read_holidays",
 	"read_shifts",
 	"read_checkin_places",
