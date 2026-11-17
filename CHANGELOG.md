@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-18
+
+### Added
+
+- Two scopes: `changes:read` and `changes:draft`.
+- Read tools for the portal set-up: `list_change_areas`, `read_settings`, `read_job_roles`, `read_people`, `read_rounds`,
+  `read_leave_types`, `read_holidays`, `read_shifts`, `read_checkin_places`, `read_templates_full`.
+- Change set tools: `draft_changes`, `get_change_set`, `list_change_sets`, `withdraw_change_set`. A key drafts changes;
+  only a person approves them in the portal on Changes to review. No tool approves, applies or undoes.
+- Prompt `change_portal`: read first, draft one set for each topic, give each item a reason, tell the person to approve.
+- A portal answer 404 `not_ready` reads "This part of the portal cannot be changed by draft yet."
+
 ### Changed
 
 - The README, the landing page and the release notes no longer name or link the portal address. Setup examples use

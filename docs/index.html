@@ -364,6 +364,8 @@ footer a{color: var(--ink-2);}
           <tr><td>Write a test plan</td><td><code>work:read</code> + <code>work:draft</code></td><td>the same, and <code>draft_checklist</code></td></tr>
           <tr><td>Leave notes on tasks</td><td>add <code>work:comment</code></td><td><code>add_comment</code></td></tr>
           <tr><td>Read test results</td><td>add <code>checks:read</code></td><td><code>get_check_results</code></td></tr>
+          <tr><td>See the portal set-up</td><td><code>changes:read</code></td><td><code>list_change_areas</code> and the nine <code>read_*</code> tools</td></tr>
+          <tr><td>Ask for changes, then approve them in the portal</td><td><code>changes:read</code> + <code>changes:draft</code></td><td>the same, and <code>draft_changes</code>, <code>get_change_set</code>, <code>list_change_sets</code>, <code>withdraw_change_set</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -391,7 +393,7 @@ footer a{color: var(--ink-2);}
 <section id="tools" aria-labelledby="tools-title">
   <div class="wrap">
     <div class="head">
-      <h2 id="tools-title">The eleven tools</h2>
+      <h2 id="tools-title">The twenty-five tools</h2>
       <p>Tools marked <span class="tag" style="margin-left:0">writes</span> send something to the portal. The rest only read.</p>
     </div>
     <div class="table panel-box">
@@ -409,6 +411,20 @@ footer a{color: var(--ink-2);}
           <tr><td><code>list_drafts</code></td><td><code>work:draft</code></td><td>Lists the draft batches you sent.</td></tr>
           <tr><td><code>get_draft</code></td><td><code>work:draft</code></td><td>Reads one draft batch, with the state of each draft.</td></tr>
           <tr><td><code>add_comment</code><span class="tag">writes</span></td><td><code>work:comment</code></td><td>Writes a note on a task, marked as written through the key.</td></tr>
+          <tr><td><code>list_change_areas</code></td><td><code>changes:read</code></td><td>Lists the areas you may draft for, the kinds of change and the shape of each value. Call it first.</td></tr>
+          <tr><td><code>read_settings</code></td><td><code>changes:read</code></td><td>Reads settings by group, search words or only the changed ones.</td></tr>
+          <tr><td><code>read_job_roles</code></td><td><code>changes:read</code></td><td>Reads job roles with their responsibilities.</td></tr>
+          <tr><td><code>read_people</code></td><td><code>changes:read</code></td><td>Reads people: main role, extra roles, responsibilities, designation and manager.</td></tr>
+          <tr><td><code>read_rounds</code></td><td><code>changes:read</code></td><td>Reads hiring rounds.</td></tr>
+          <tr><td><code>read_leave_types</code></td><td><code>changes:read</code></td><td>Reads leave types.</td></tr>
+          <tr><td><code>read_holidays</code></td><td><code>changes:read</code></td><td>Reads holidays for a year.</td></tr>
+          <tr><td><code>read_shifts</code></td><td><code>changes:read</code></td><td>Reads shifts and shift patterns.</td></tr>
+          <tr><td><code>read_checkin_places</code></td><td><code>changes:read</code></td><td>Reads offices and the check-in place settings.</td></tr>
+          <tr><td><code>read_templates_full</code></td><td><code>changes:read</code></td><td>Reads task templates with their repeats.</td></tr>
+          <tr><td><code>draft_changes</code><span class="tag">writes</span></td><td><code>changes:draft</code></td><td>Drafts one change set. Nothing changes until a person approves it on Changes to review.</td></tr>
+          <tr><td><code>get_change_set</code></td><td><code>changes:draft</code></td><td>Reads one set you drafted, with the lines and status of each item.</td></tr>
+          <tr><td><code>list_change_sets</code></td><td><code>changes:draft</code></td><td>Lists the sets you drafted, newest first.</td></tr>
+          <tr><td><code>withdraw_change_set</code><span class="tag">writes</span></td><td><code>changes:draft</code></td><td>Withdraws a set that still waits for review.</td></tr>
         </tbody>
       </table>
     </div>
@@ -428,6 +444,8 @@ footer a{color: var(--ink-2);}
           <dd>Explains the plan format and the writing rules, then the agent sends the plan with <code>draft_checklist</code>. Optional subject.</dd>
           <dt><code>plan_growth_work</code></dt>
           <dd>Plans business work as main tasks with sub-tasks, each with one result and a "done when" a reviewer can check. Optional goal and category.</dd>
+          <dt><code>change_portal</code></dt>
+          <dd>Read first, draft one set for each topic, give each item a reason, then tell you to approve on Changes to review. Optional what.</dd>
         </dl>
         <h3 style="margin-top: var(--s6)">Settings</h3>
         <dl>

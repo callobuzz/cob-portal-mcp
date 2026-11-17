@@ -106,32 +106,63 @@ If a key stops working, make a new one on the same page.
 
 ## Scopes
 
-| Scope          | What it allows                                                          |
-| -------------- | ----------------------------------------------------------------------- |
-| `work:read`    | Read tasks, task templates and task categories.                         |
-| `work:draft`   | Send draft tasks and check lists for approval. Read your draft batches. |
-| `work:comment` | Write notes on tasks.                                                   |
-| `checks:read`  | Read check list results.                                                |
+| Scope           | What it allows                                                                                                       |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `work:read`     | Read tasks, task templates and task categories.                                                                      |
+| `work:draft`    | Send draft tasks and check lists for approval. Read your draft batches.                                              |
+| `work:comment`  | Write notes on tasks.                                                                                                |
+| `checks:read`   | Read check list results.                                                                                             |
+| `changes:read`  | Read the current portal set-up (settings, job roles, people and their roles, and more). Changes nothing.             |
+| `changes:draft` | Draft change sets for a person to approve. Read, withdraw and list your own sets. Never approves, applies or undoes. |
 
 At start the server calls `GET /api/v1/me` and offers **only the tools whose scope the key has**. `whoami` needs no scope.
 
 ## Tools
 
-| Tool                | Scope          | What it does                                                                                  |
-| ------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| `whoami`            | none           | Shows the person, the key name, its scopes and its end date.                                  |
-| `list_tasks`        | `work:read`    | Lists tasks (`scope` mine or team, `status`, `limit`, `category`, `parent_id` for sub-tasks). |
-| `get_task`          | `work:read`    | Reads one task with its steps, answers, notes, category, parent and sub-task count.           |
-| `list_templates`    | `work:read`    | Lists the published task templates, with their category.                                      |
-| `list_categories`   | `work:read`    | Lists the task categories the portal offers.                                                  |
-| `get_check_results` | `checks:read`  | Reads the test runs and skips of a check list task. File names only.                          |
-| `add_comment`       | `work:comment` | Writes a note on a task.                                                                      |
-| `draft_tasks`       | `work:draft`   | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).   |
-| `draft_checklist`   | `work:draft`   | Sends a test plan (plan JSON) as one draft with a check list.                                 |
-| `list_drafts`       | `work:draft`   | Lists the draft batches you sent.                                                             |
-| `get_draft`         | `work:draft`   | Reads one draft batch, with the state, category and parent of each draft.                     |
+| Tool                  | Scope           | What it does                                                                                       |
+| --------------------- | --------------- | -------------------------------------------------------------------------------------------------- |
+| `whoami`              | none            | Shows the person, the key name, its scopes and its end date.                                       |
+| `list_tasks`          | `work:read`     | Lists tasks (`scope` mine or team, `status`, `limit`, `category`, `parent_id` for sub-tasks).      |
+| `get_task`            | `work:read`     | Reads one task with its steps, answers, notes, category, parent and sub-task count.                |
+| `list_templates`      | `work:read`     | Lists the published task templates, with their category.                                           |
+| `list_categories`     | `work:read`     | Lists the task categories the portal offers.                                                       |
+| `get_check_results`   | `checks:read`   | Reads the test runs and skips of a check list task. File names only.                               |
+| `add_comment`         | `work:comment`  | Writes a note on a task.                                                                           |
+| `draft_tasks`         | `work:draft`    | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).        |
+| `draft_checklist`     | `work:draft`    | Sends a test plan (plan JSON) as one draft with a check list.                                      |
+| `list_drafts`         | `work:draft`    | Lists the draft batches you sent.                                                                  |
+| `get_draft`           | `work:draft`    | Reads one draft batch, with the state, category and parent of each draft.                          |
+| `list_change_areas`   | `changes:read`  | Lists the areas you may draft for, the kinds of change and the shape of each value. Call it first. |
+| `read_settings`       | `changes:read`  | Reads settings (`group`, `search`, `changed_only`).                                                |
+| `read_job_roles`      | `changes:read`  | Reads job roles with their responsibilities.                                                       |
+| `read_people`         | `changes:read`  | Reads people: main role, extra roles, responsibilities, designation, manager (`person`, `search`). |
+| `read_rounds`         | `changes:read`  | Reads hiring rounds.                                                                               |
+| `read_leave_types`    | `changes:read`  | Reads leave types.                                                                                 |
+| `read_holidays`       | `changes:read`  | Reads holidays (`year`).                                                                           |
+| `read_shifts`         | `changes:read`  | Reads shifts and shift patterns.                                                                   |
+| `read_checkin_places` | `changes:read`  | Reads offices and the check-in place settings.                                                     |
+| `read_templates_full` | `changes:read`  | Reads task templates with their repeats.                                                           |
+| `draft_changes`       | `changes:draft` | Drafts one change set (title, reason, items). Nothing changes until a person approves it.          |
+| `get_change_set`      | `changes:draft` | Reads one set you drafted, with the lines and status of each item.                                 |
+| `list_change_sets`    | `changes:draft` | Lists the sets you drafted, newest first.                                                          |
+| `withdraw_change_set` | `changes:draft` | Withdraws a set that still waits for review.                                                       |
 
 Every POST carries a new `Idempotency-Key` (a UUID for each tool call), so a repeated call does not make a second draft.
+
+### Ask Claude to change settings
+
+You do not write JSON. You ask in plain words, and Claude does the steps:
+
+1. You say: "Give Ravi the extra job role Sales and make Neha his manager. Also set the notice period to 45 days."
+2. Claude reads the current state (`list_change_areas`, `read_people`, `read_settings`). It never guesses.
+3. Claude drafts **one set** with `draft_changes`. Each change has its own reason.
+4. The portal answers with the plain lines of each change. Claude shows them to you.
+5. You open **Changes to review** in the portal. You approve or reject each line. You can undo a line you approved.
+6. Claude calls `get_change_set` and tells you what was applied.
+
+Nothing changes until you approve in the portal. Money, the admin account and executive roles are refused, so
+change those in the portal itself. If a part of the portal cannot be drafted yet, Claude says:
+"This part of the portal cannot be changed by draft yet."
 
 ### A main task with sub-tasks
 
@@ -152,6 +183,8 @@ tasks go to the person or pool the admin picks, and the sub-tasks can wait so th
 - `plan_growth_work` (optional `goal`, `category`) explains how to plan business work as main tasks with sub-tasks in the
   portal's words: one result per task, "What to hand in" in the notes, a `doneWhen` a reviewer can check, numbers as starting
   values. Then the agent sends it with `draft_tasks`.
+- `change_portal` (optional `what`) tells the agent the flow: read first, draft one set for each topic, give each item a reason,
+  show you the lines the portal returned, and tell you to approve on Changes to review.
 
 Each draft waits for a person to approve it in the portal.
 
@@ -175,6 +208,8 @@ When the portal refuses a call, the agent gets the portal's error code, its mess
   key to a log, an error or a URL.
 - **The key acts as you, cut to its scopes.** A key never has more rights than the person who made it.
 - **The agent can only make drafts and notes.** It cannot approve, assign, change a task, pay, send mail or delete.
+- **A key drafts changes; only a person approves them in the portal.** No tool approves, applies or undoes a change set.
+  The portal refuses money, the admin account and executive roles, even as a draft.
 - **A person approves every draft.** Nothing becomes a task until a person approves it in the portal.
 - **You can revoke a key at any time.** Open the portal Profile page and revoke the key. It stops working at once.
 - **Report a vulnerability in private.** Follow [SECURITY.md](./SECURITY.md). Do not open a public issue.

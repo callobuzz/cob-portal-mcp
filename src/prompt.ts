@@ -145,3 +145,31 @@ Fields of a case:
 Call the draft_checklist tool with the plan. If the portal lists problems, each has a path. Fix those and send the whole plan again.
 The plan does not become a task at once. It waits as a draft until a person approves it in the portal.`;
 }
+
+/** The text of the change_portal prompt: how to ask for a change, read first, draft one set, a person approves. */
+export function changePortalPrompt(what: string): string {
+	return `Change the Call O Buzz portal set-up for a person, by drafting a change set that the person approves in the portal.
+
+Change wanted: ${what || "(what the person asked for, in their own words)"}
+
+## The flow
+
+1. Read first. Call list_change_areas to see the areas and the shape of each change. Then call the read_* tools for the
+   areas you touch (read_settings, read_job_roles, read_people, read_rounds, read_leave_types, read_holidays, read_shifts,
+   read_checkin_places, read_templates_full). Never guess an id, a setting key or a current value.
+2. Draft one set for each topic. Call draft_changes with a title, a reason and the items. Each item has an area, a kind,
+   a target (the id or setting key, none for a create), the new value in after, and its own reason.
+3. Nothing changes yet. The portal answers with a set_id and the plain lines of each change. Show the person those lines
+   as the portal returned them. Do not rewrite them.
+4. Tell the person to open Changes to review in the portal and approve or reject each item there.
+5. Later, call get_change_set to say what happened. Use withdraw_change_set if the person changes their mind before they review.
+
+## Rules
+
+- You never approve, apply or undo a change. Only a person does that in the portal.
+- Money (pay, advances, wallets, invoices), the admin account and executive roles are refused. Tell the person to change
+  those in the portal itself. Some settings groups are blocked by the admin for the same reason.
+- If the portal answers with problems, each has a path. Fix those items and send the set again.
+- If it says "This part of the portal cannot be changed by draft yet.", say so. Do not look for another way.
+- Write the reasons in plain, short sentences.`;
+}

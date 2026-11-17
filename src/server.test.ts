@@ -47,6 +47,20 @@ async function connect(scopes: string[], reply: Parameters<typeof fakePortal>[0]
 	return { client, calls: fake.calls, tools };
 }
 
+const CHANGE_READ = [
+	"list_change_areas",
+	"read_settings",
+	"read_job_roles",
+	"read_people",
+	"read_rounds",
+	"read_leave_types",
+	"read_holidays",
+	"read_shifts",
+	"read_checkin_places",
+	"read_templates_full",
+];
+const CHANGE_DRAFT = ["draft_changes", "get_change_set", "list_change_sets", "withdraw_change_set"];
+
 const text = (r: unknown) => ((r as { content: { text: string }[] }).content[0] as { text: string }).text;
 
 describe("scope filtering", () => {
@@ -96,8 +110,138 @@ describe("scope filtering", () => {
 			draft_checklist: "work:draft",
 			list_drafts: "work:draft",
 			get_draft: "work:draft",
+			...Object.fromEntries(CHANGE_READ.map((n) => [n, "changes:read"])),
+			...Object.fromEntries(CHANGE_DRAFT.map((n) => [n, "changes:draft"])),
 		});
 		expect(visibleTools(ALL_TOOLS, ["checks:read"]).map((t) => t.name)).toEqual(["whoami", "get_check_results"]);
+	});
+});
+
+describe("change tools (M26)", () => {
+	it("show only with their scopes", async () => {
+		const none = await connect(["work:read", "work:draft", "work:comment", "checks:read"]);
+		const noneNames = (await none.client.listTools()).tools.map((t) => t.name);
+		for (const n of [...CHANGE_READ, ...CHANGE_DRAFT]) expect(noneNames).not.toContain(n);
+
+		const read = await connect(["changes:read"]);
+		expect((await read.client.listTools()).tools.map((t) => t.name).sort()).toEqual(["whoami", ...CHANGE_READ].sort());
+
+		const draft = await connect(["changes:draft"]);
+		expect((await draft.client.listTools()).tools.map((t) => t.name).sort()).toEqual(
+			["whoami", ...CHANGE_DRAFT].sort(),
+		);
+	});
+
+	it("has no tool that approves, applies or undoes, and every description says a person approves", () => {
+		for (const t of ALL_TOOLS) expect(t.name).not.toMatch(/approve|apply|undo/);
+		const draft = ALL_TOOLS.find((t) => t.name === "draft_changes");
+		expect(draft?.scope).toBe("changes:draft");
+		expect(draft?.description).toContain("Changes to review");
+		expect(draft?.description).toContain("Nothing changes now");
+		for (const n of CHANGE_READ) {
+			const t = ALL_TOOLS.find((x) => x.name === n);
+			expect(t?.write).toBe(false);
+			expect(t?.description).toContain("Changes to review");
+		}
+	});
+
+	it("draft_changes posts the body as given, with a new Idempotency-Key", async () => {
+		const { client, calls } = await connect(["changes:draft"], () => ({
+			status: 201,
+			json: { set_id: ID, status: "draft", items: [{ seq: 1, lines: ["Notice period: 30 days to 45 days"] }] },
+		}));
+		const body = {
+			title: "Notice period",
+			reason: "SV asked",
+			items: [
+				{ area: "settings", kind: "update", target: "hr.notice_days", after: 45, reason: "Longer hand-over" },
+				{ area: "people", kind: "update", target: ID, after: { extraRoles: ["a"] }, reason: "Covers sales" },
+			],
+		};
+		const r = await client.callTool({ name: "draft_changes", arguments: body });
+		expect(r.isError).toBeFalsy();
+		const c = calls[0] as Call;
+		expect(c.method).toBe("POST");
+		expect(c.url.pathname).toBe("/api/v1/changes");
+		expect(c.body).toEqual(body);
+		expect(c.headers["Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
+	});
+
+	it("refuses an item with no reason or an unknown area before any call", async () => {
+		const { client, calls } = await connect(["changes:draft"]);
+		const noReason = await client.callTool({
+			name: "draft_changes",
+			arguments: { title: "T", reason: "R", items: [{ area: "settings", kind: "update", target: "x", after: 1 }] },
+		});
+		const badArea = await client.callTool({
+			name: "draft_changes",
+			arguments: { title: "T", reason: "R", items: [{ area: "pay", kind: "update", after: 1, reason: "r" }] },
+		});
+		expect(noReason.isError).toBe(true);
+		expect(badArea.isError).toBe(true);
+		expect(calls).toHaveLength(0);
+	});
+
+	it("get_change_set, list_change_sets and withdraw_change_set call the set routes", async () => {
+		const { client, calls } = await connect(["changes:draft"]);
+		await client.callTool({ name: "get_change_set", arguments: { set_id: ID } });
+		await client.callTool({ name: "list_change_sets", arguments: {} });
+		await client.callTool({ name: "withdraw_change_set", arguments: { set_id: ID } });
+		expect((calls[0] as Call).method).toBe("GET");
+		expect((calls[0] as Call).url.pathname).toBe(`/api/v1/changes/${ID}`);
+		expect((calls[1] as Call).url.pathname).toBe("/api/v1/changes");
+		expect((calls[2] as Call).method).toBe("POST");
+		expect((calls[2] as Call).url.pathname).toBe(`/api/v1/changes/${ID}/withdraw`);
+	});
+
+	it("read tools call the state routes with the right query", async () => {
+		const { client, calls } = await connect(["changes:read"]);
+		await client.callTool({ name: "list_change_areas", arguments: {} });
+		await client.callTool({
+			name: "read_settings",
+			arguments: { group: "attendance", search: "grace", changed_only: true },
+		});
+		await client.callTool({ name: "read_people", arguments: { search: "Ravi" } });
+		await client.callTool({ name: "read_holidays", arguments: { year: 2027 } });
+		await client.callTool({ name: "read_shifts", arguments: {} });
+		await client.callTool({ name: "read_checkin_places", arguments: {} });
+		const paths = calls.map((c) => c.url.pathname);
+		expect(paths[0]).toBe("/api/v1/changes/areas");
+		expect(paths[1]).toBe("/api/v1/state/settings");
+		const s = (calls[1] as Call).url.searchParams;
+		expect([s.get("group"), s.get("q"), s.get("changed")]).toEqual(["attendance", "grace", "1"]);
+		expect((calls[2] as Call).url.searchParams.get("q")).toBe("Ravi");
+		expect((calls[3] as Call).url.searchParams.get("year")).toBe("2027");
+		expect(paths).toContain("/api/v1/state/shifts");
+		expect(paths).toContain("/api/v1/state/patterns");
+		expect(paths).toContain("/api/v1/state/offices");
+		for (const c of calls) expect(c.method).toBe("GET");
+	});
+
+	it("turns a 404 not_ready into plain words", async () => {
+		const { client } = await connect(["changes:read"], () => ({
+			status: 404,
+			json: { error: { code: "not_ready", message: "This area is not ready yet", details: null } },
+		}));
+		const r = await client.callTool({ name: "read_rounds", arguments: {} });
+		expect(r.isError).toBe(true);
+		expect(text(r)).toBe("This part of the portal cannot be changed by draft yet.");
+	});
+
+	it("the change_portal prompt tells the flow", async () => {
+		const { client } = await connect(["changes:draft"]);
+		const p = await client.getPrompt({ name: "change_portal", arguments: { what: "give Ravi a second role" } });
+		const t = ((p.messages[0] as { content: unknown }).content as { text: string }).text;
+		for (const w of [
+			"Read first",
+			"draft_changes",
+			"Changes to review",
+			"one set for each topic",
+			"give Ravi a second role",
+		]) {
+			expect(t).toContain(w);
+		}
+		expect(t).not.toContain("—");
 	});
 });
 
@@ -321,7 +465,7 @@ describe("prompt", () => {
 	it("explains the plan format and the rules", async () => {
 		const { client } = await connect(["work:draft"]);
 		const list = await client.listPrompts();
-		expect(list.prompts.map((p) => p.name)).toEqual(["write_test_plan", "plan_growth_work"]);
+		expect(list.prompts.map((p) => p.name)).toEqual(["write_test_plan", "plan_growth_work", "change_portal"]);
 		const p = await client.getPrompt({ name: "write_test_plan", arguments: { subject: "the login page" } });
 		const t = ((p.messages[0] as { content: unknown }).content as { text: string }).text;
 		for (const word of [
