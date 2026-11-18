@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-18
+
+### Changed
+
+- The change guide asks for one item per part of a person's record, so each part can be approved alone in Changes to review.
+
 ## [0.5.0] - 2026-11-18
 
 ### Added

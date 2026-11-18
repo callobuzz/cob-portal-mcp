@@ -159,6 +159,10 @@ Change wanted: ${what || "(what the person asked for, in their own words)"}
    read_checkin_places, read_templates_full). Never guess an id, a setting key or a current value.
 2. Draft one set for each topic. Call draft_changes with a title, a reason and the items. Each item has an area, a kind,
    a target (the id or setting key, none for a create), the new value in after, and its own reason.
+   For a person (area people), send one item for each part, so the reviewer can approve each part alone: the designation,
+   the grade, the department, the manager, the probation end, the notice period, the work mode, and each role's duties.
+   A new or removed job role goes in ONE item together with that role's duties. The portal refuses two items that change
+   the same part.
 3. Nothing changes yet. The portal answers with a set_id and the plain lines of each change. Show the person those lines
    as the portal returned them. Do not rewrite them.
 4. Tell the person to open Changes to review in the portal and approve or reject each item there.
