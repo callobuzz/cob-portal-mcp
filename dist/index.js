@@ -1,6 +1,6 @@
 // src/core.ts
 import { randomUUID } from "crypto";
-var VERSION = "0.5.0";
+var VERSION = "0.6.0";
 var DEFAULT_TIMEOUT_MS = 3e4;
 var PortalError = class extends Error {
   constructor(message, status) {
@@ -302,7 +302,7 @@ Change wanted: ${what || "(what the person asked for, in their own words)"}
 
 1. Read first. Call list_change_areas to see the areas and the shape of each change. Then call the read_* tools for the
    areas you touch (read_settings, read_job_roles, read_people, read_rounds, read_leave_types, read_leave_policies, read_offers, read_offer_templates, read_holidays, read_shifts,
-   read_checkin_places, read_templates_full). Never guess an id, a setting key or a current value.
+   read_checkin_places, read_templates_full, read_access_roles, read_access_presets, read_person_access, read_access_holders). Never guess an id, a setting key or a current value.
 2. Draft one set for each topic. Call draft_changes with a title, a reason and the items. Each item has an area, a kind,
    a target (the id or setting key, none for a create), the new value in after, and its own reason.
    For a person (area people), send one item for each part, so the reviewer can approve each part alone: the designation,
@@ -398,7 +398,11 @@ var AREAS = [
   "shifts",
   "patterns",
   "offices",
-  "offers"
+  "offers",
+  "access_roles",
+  "access_presets",
+  "access_holdings",
+  "person_access"
 ];
 var FLOW = "This tool never changes the portal. A change is only drafted: nothing changes until a person approves it on Changes to review in the portal.";
 var NOT_READY = "This part of the portal cannot be changed by draft yet.";
@@ -629,6 +633,36 @@ var ALL_TOOLS = [
     () => ({ view: "templates" })
   ),
   stateTool(
+    "read_access_roles",
+    "Read access roles",
+    "access roles with their permissions, whether each makes a team, and how many people hold each, plus every permission an access role may hold. Only the admin's key can read them",
+    "access_roles"
+  ),
+  stateTool(
+    "read_access_presets",
+    "Read presets",
+    "permissions that each job role, designation and department gives (they start empty), with who holds each source. Only the admin's key can read them",
+    "access_presets"
+  ),
+  stateTool(
+    "read_person_access",
+    "Read what a person may do, and why",
+    "what one person may do in the portal and where each permission comes from (base role, access role, job role, designation, department, a personal grant), and what was removed. Only the admin's key can read it",
+    "person_access",
+    { person: z.string().min(1).describe("The person: id or email.") },
+    (i) => ({ person: i.person })
+  ),
+  stateTool(
+    "read_access_holders",
+    "Read who holds a permission",
+    "everyone who holds one permission now, each with where it comes from. Only the admin's key can read it",
+    "person_access",
+    {
+      code: z.string().min(1).describe("The permission code, like leave:approve. read_access_roles lists every code.")
+    },
+    (i) => ({ code: i.code })
+  ),
+  stateTool(
     "read_holidays",
     "Read holidays",
     "holidays",
@@ -670,7 +704,7 @@ var ALL_TOOLS = [
   def({
     name: "draft_changes",
     title: "Draft a change set for approval",
-    description: "Draft one change set: a title, a reason and a list of items, each with area, kind, target, after and its own reason. Read the current state first (list_change_areas and the read_* tools). Make one set for each topic, for example one set for 'Roles for Ravi and Neha'. Every item needs a reason. Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal returned. Only the admin's key may draft money and offer letters. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and send the set again.",
+    description: "Draft one change set: a title, a reason and a list of items, each with area, kind, target, after and its own reason. Read the current state first (list_change_areas and the read_* tools). Make one set for each topic, for example one set for 'Roles for Ravi and Neha'. Every item needs a reason. Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal returned. Only the admin's key may draft money and offer letters. Access areas (access_roles, access_presets, access_holdings, person_access) are for the admin's key only, and only the admin approves them. Read first: read_person_access, read_access_presets. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and send the set again.",
     scope: "changes:draft",
     write: true,
     input: {

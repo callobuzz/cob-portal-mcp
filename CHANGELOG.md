@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-18
+
+### Added
+
+- Read access roles, presets, what a person may do and why, and who holds a permission (`read_access_roles`, `read_access_presets`, `read_person_access`, `read_access_holders`). Admin key only.
+
+- The four access areas (`access_roles`, `access_presets`, `access_holdings`, `person_access`): draft_changes may carry them. Admin key only; only the admin approves them on Changes to review.
+
 ## [0.5.1] - 2026-11-18
 
 ### Changed

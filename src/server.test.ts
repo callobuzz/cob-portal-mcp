@@ -61,6 +61,10 @@ const CHANGE_READ = [
 	"read_shifts",
 	"read_checkin_places",
 	"read_templates_full",
+	"read_access_roles",
+	"read_access_presets",
+	"read_person_access",
+	"read_access_holders",
 ];
 const CHANGE_DRAFT = ["draft_changes", "get_change_set", "list_change_sets", "withdraw_change_set"];
 
@@ -210,6 +214,7 @@ describe("change tools (M26)", () => {
 		await client.callTool({ name: "read_checkin_places", arguments: {} });
 		await client.callTool({ name: "read_offers", arguments: { person: "a@b.c" } });
 		await client.callTool({ name: "read_offer_templates", arguments: {} });
+		await client.callTool({ name: "read_access_holders", arguments: { code: "hiring:view" } });
 		const paths = calls.map((c) => c.url.pathname);
 		expect(paths[0]).toBe("/api/v1/changes/areas");
 		expect(paths[1]).toBe("/api/v1/state/settings");
@@ -224,6 +229,11 @@ describe("change tools (M26)", () => {
 		expect(offerCalls).toHaveLength(2);
 		expect((offerCalls[0] as Call).url.searchParams.get("person")).toBe("a@b.c");
 		expect((offerCalls[1] as Call).url.searchParams.get("view")).toBe("templates");
+		const accessCalls = calls.filter((c) => c.url.pathname === "/api/v1/state/person_access");
+		expect(accessCalls).toHaveLength(1);
+		expect((accessCalls[0] as Call).url.pathname + (accessCalls[0] as Call).url.search).toBe(
+			"/api/v1/state/person_access?code=hiring%3Aview",
+		);
 		for (const c of calls) expect(c.method).toBe("GET");
 	});
 

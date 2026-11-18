@@ -144,6 +144,10 @@ At start the server calls `GET /api/v1/me` and offers **only the tools whose sco
 | `read_shifts`          | `changes:read`  | Reads shifts and shift patterns.                                                                   |
 | `read_checkin_places`  | `changes:read`  | Reads offices and the check-in place settings.                                                     |
 | `read_templates_full`  | `changes:read`  | Reads task templates with their repeats.                                                           |
+| `read_access_roles`    | `changes:read`  | Reads access roles with their permissions and holders. Admin key only.                             |
+| `read_access_presets`  | `changes:read`  | Reads the permissions each job role, designation and department gives. Admin key only.             |
+| `read_person_access`   | `changes:read`  | Reads what one person may do and why (`person`). Admin key only.                                   |
+| `read_access_holders`  | `changes:read`  | Reads who holds one permission (`code`), and where it comes from. Admin key only.                  |
 | `draft_changes`        | `changes:draft` | Drafts one change set (title, reason, items). Nothing changes until a person approves it.          |
 | `get_change_set`       | `changes:draft` | Reads one set you drafted, with the lines and status of each item.                                 |
 | `list_change_sets`     | `changes:draft` | Lists the sets you drafted, newest first.                                                          |

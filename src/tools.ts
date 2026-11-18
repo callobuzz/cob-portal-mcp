@@ -161,6 +161,10 @@ const AREAS = [
 	"patterns",
 	"offices",
 	"offers",
+	"access_roles",
+	"access_presets",
+	"access_holdings",
+	"person_access",
 ] as const;
 
 /** The words every change tool tells the model. Nothing changes until a person approves the set in the portal. */
@@ -447,6 +451,36 @@ export const ALL_TOOLS: AnyTool[] = [
 		() => ({ view: "templates" }),
 	),
 	stateTool(
+		"read_access_roles",
+		"Read access roles",
+		"access roles with their permissions, whether each makes a team, and how many people hold each, plus every permission an access role may hold. Only the admin's key can read them",
+		"access_roles",
+	),
+	stateTool(
+		"read_access_presets",
+		"Read presets",
+		"permissions that each job role, designation and department gives (they start empty), with who holds each source. Only the admin's key can read them",
+		"access_presets",
+	),
+	stateTool(
+		"read_person_access",
+		"Read what a person may do, and why",
+		"what one person may do in the portal and where each permission comes from (base role, access role, job role, designation, department, a personal grant), and what was removed. Only the admin's key can read it",
+		"person_access",
+		{ person: z.string().min(1).describe("The person: id or email.") },
+		(i) => ({ person: i.person as string }),
+	),
+	stateTool(
+		"read_access_holders",
+		"Read who holds a permission",
+		"everyone who holds one permission now, each with where it comes from. Only the admin's key can read it",
+		"person_access",
+		{
+			code: z.string().min(1).describe("The permission code, like leave:approve. read_access_roles lists every code."),
+		},
+		(i) => ({ code: i.code as string }),
+	),
+	stateTool(
 		"read_holidays",
 		"Read holidays",
 		"holidays",
@@ -502,7 +536,9 @@ export const ALL_TOOLS: AnyTool[] = [
 			"example one set for 'Roles for Ravi and Neha'. Every item needs a reason. " +
 			"Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each " +
 			"item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal " +
-			"returned. Only the admin's key may draft money and offer letters. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell " +
+			"returned. Only the admin's key may draft money and offer letters. Access areas (access_roles, access_presets, " +
+			"access_holdings, person_access) are for the admin's key only, and only the admin approves them. Read first: " +
+			"read_person_access, read_access_presets. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell " +
 			"the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and " +
 			"send the set again.",
 		scope: "changes:draft",
