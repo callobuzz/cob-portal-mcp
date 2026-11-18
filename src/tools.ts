@@ -413,7 +413,12 @@ export const ALL_TOOLS: AnyTool[] = [
 	),
 	stateTool("read_rounds", "Read hiring rounds", "hiring rounds", "rounds"),
 	stateTool("read_leave_types", "Read leave types", "leave types", "leave_types"),
-	stateTool("read_leave_policies", "Read leave policies", "leave policies (days a year, how days are earned, carry forward)", "leave_policies"),
+	stateTool(
+		"read_leave_policies",
+		"Read leave policies",
+		"leave policies (days a year, how days are earned, carry forward)",
+		"leave_policies",
+	),
 	stateTool(
 		"read_holidays",
 		"Read holidays",
