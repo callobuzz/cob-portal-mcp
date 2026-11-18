@@ -55,6 +55,8 @@ const CHANGE_READ = [
 	"read_rounds",
 	"read_leave_types",
 	"read_leave_policies",
+	"read_offers",
+	"read_offer_templates",
 	"read_holidays",
 	"read_shifts",
 	"read_checkin_places",
@@ -206,6 +208,8 @@ describe("change tools (M26)", () => {
 		await client.callTool({ name: "read_holidays", arguments: { year: 2027 } });
 		await client.callTool({ name: "read_shifts", arguments: {} });
 		await client.callTool({ name: "read_checkin_places", arguments: {} });
+		await client.callTool({ name: "read_offers", arguments: { person: "a@b.c" } });
+		await client.callTool({ name: "read_offer_templates", arguments: {} });
 		const paths = calls.map((c) => c.url.pathname);
 		expect(paths[0]).toBe("/api/v1/changes/areas");
 		expect(paths[1]).toBe("/api/v1/state/settings");
@@ -216,6 +220,10 @@ describe("change tools (M26)", () => {
 		expect(paths).toContain("/api/v1/state/shifts");
 		expect(paths).toContain("/api/v1/state/patterns");
 		expect(paths).toContain("/api/v1/state/offices");
+		const offerCalls = calls.filter((c) => c.url.pathname === "/api/v1/state/offers");
+		expect(offerCalls).toHaveLength(2);
+		expect((offerCalls[0] as Call).url.searchParams.get("person")).toBe("a@b.c");
+		expect((offerCalls[1] as Call).url.searchParams.get("view")).toBe("templates");
 		for (const c of calls) expect(c.method).toBe("GET");
 	});
 

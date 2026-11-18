@@ -160,6 +160,7 @@ const AREAS = [
 	"shifts",
 	"patterns",
 	"offices",
+	"offers",
 ] as const;
 
 /** The words every change tool tells the model. Nothing changes until a person approves the set in the portal. */
@@ -377,7 +378,7 @@ export const ALL_TOOLS: AnyTool[] = [
 			"restore, move), the shape of `after` for each kind and examples. Call this first, then read the current state with " +
 			"the read_* tools, then call draft_changes. " +
 			FLOW +
-			" Money, the admin account and executive roles cannot be drafted.",
+			" Only the admin's key may draft money and offer letters; other keys are refused money, the admin account and executive roles.",
 		scope: "changes:read",
 		write: false,
 		input: {},
@@ -418,6 +419,32 @@ export const ALL_TOOLS: AnyTool[] = [
 		"Read leave policies",
 		"leave policies (days a year, how days are earned, carry forward)",
 		"leave_policies",
+	),
+	stateTool(
+		"read_offers",
+		"Read offer letters",
+		"offer letters (draft, sent, accepted) with their fields, and for one person the editor's defaults from the employee record. Only the admin's key can read them",
+		"offers",
+		{
+			person: z.string().min(1).optional().describe("One person: id or email. Adds the defaults for a new offer."),
+			application: z.string().min(1).optional().describe("One application id."),
+			status: z.enum(["draft", "sent", "accepted", "declined", "expired", "withdrawn"]).optional(),
+			search: z.string().min(1).optional().describe("Part of a name or an offer ref."),
+		},
+		(i) => ({
+			person: i.person as string | undefined,
+			application: i.application as string | undefined,
+			status: i.status as string | undefined,
+			q: i.search as string | undefined,
+		}),
+	),
+	stateTool(
+		"read_offer_templates",
+		"Read the offer letter template",
+		"offer letter template: its sections (which can be switched off), the fields it uses and the default values",
+		"offers",
+		{},
+		() => ({ view: "templates" }),
 	),
 	stateTool(
 		"read_holidays",
@@ -475,8 +502,8 @@ export const ALL_TOOLS: AnyTool[] = [
 			"example one set for 'Roles for Ravi and Neha'. Every item needs a reason. " +
 			"Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each " +
 			"item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal " +
-			"returned. Money, the admin account, executive roles and the settings groups the admin blocked are refused: tell " +
-			"the person to change those in the portal itself. If the portal lists problems, each has a path: fix them and " +
+			"returned. Only the admin's key may draft money and offer letters. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell " +
+			"the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and " +
 			"send the set again.",
 		scope: "changes:draft",
 		write: true,

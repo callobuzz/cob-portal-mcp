@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
+### Added
+
+-
+ead_offers and
+ead_offer_templates: read offer letters and the offer letter template (admin key only; the portal decides).
+
+- The offers change area: draft_changes may carry offers items. The admin reads a draft offer and presses Issue in the portal.
+
+### Changed
+
+- The admin's key may draft money and offer letters. Other keys are still refused. Only the admin approves these items.
+
 ## [0.4.0] - 2026-11-18
 
 ### Added

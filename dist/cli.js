@@ -5,7 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 // src/core.ts
 import { randomUUID } from "crypto";
-var VERSION = "0.4.0";
+var VERSION = "0.5.0";
 var DEFAULT_TIMEOUT_MS = 3e4;
 var PortalError = class extends Error {
   constructor(message, status) {
@@ -310,7 +310,7 @@ Change wanted: ${what || "(what the person asked for, in their own words)"}
 ## The flow
 
 1. Read first. Call list_change_areas to see the areas and the shape of each change. Then call the read_* tools for the
-   areas you touch (read_settings, read_job_roles, read_people, read_rounds, read_leave_types, read_leave_policies, read_holidays, read_shifts,
+   areas you touch (read_settings, read_job_roles, read_people, read_rounds, read_leave_types, read_leave_policies, read_offers, read_offer_templates, read_holidays, read_shifts,
    read_checkin_places, read_templates_full). Never guess an id, a setting key or a current value.
 2. Draft one set for each topic. Call draft_changes with a title, a reason and the items. Each item has an area, a kind,
    a target (the id or setting key, none for a create), the new value in after, and its own reason.
@@ -398,7 +398,8 @@ var AREAS = [
   "holidays",
   "shifts",
   "patterns",
-  "offices"
+  "offices",
+  "offers"
 ];
 var FLOW = "This tool never changes the portal. A change is only drafted: nothing changes until a person approves it on Changes to review in the portal.";
 var NOT_READY = "This part of the portal cannot be changed by draft yet.";
@@ -560,7 +561,7 @@ var ALL_TOOLS = [
   def({
     name: "list_change_areas",
     title: "List the areas you can draft changes for",
-    description: "List every part of the portal this key can draft changes for: its key, label, the kinds (create, update, archive, restore, move), the shape of `after` for each kind and examples. Call this first, then read the current state with the read_* tools, then call draft_changes. " + FLOW + " Money, the admin account and executive roles cannot be drafted.",
+    description: "List every part of the portal this key can draft changes for: its key, label, the kinds (create, update, archive, restore, move), the shape of `after` for each kind and examples. Call this first, then read the current state with the read_* tools, then call draft_changes. " + FLOW + " Only the admin's key may draft money and offer letters; other keys are refused money, the admin account and executive roles.",
     scope: "changes:read",
     write: false,
     input: {},
@@ -601,6 +602,32 @@ var ALL_TOOLS = [
     "Read leave policies",
     "leave policies (days a year, how days are earned, carry forward)",
     "leave_policies"
+  ),
+  stateTool(
+    "read_offers",
+    "Read offer letters",
+    "offer letters (draft, sent, accepted) with their fields, and for one person the editor's defaults from the employee record. Only the admin's key can read them",
+    "offers",
+    {
+      person: z.string().min(1).optional().describe("One person: id or email. Adds the defaults for a new offer."),
+      application: z.string().min(1).optional().describe("One application id."),
+      status: z.enum(["draft", "sent", "accepted", "declined", "expired", "withdrawn"]).optional(),
+      search: z.string().min(1).optional().describe("Part of a name or an offer ref.")
+    },
+    (i) => ({
+      person: i.person,
+      application: i.application,
+      status: i.status,
+      q: i.search
+    })
+  ),
+  stateTool(
+    "read_offer_templates",
+    "Read the offer letter template",
+    "offer letter template: its sections (which can be switched off), the fields it uses and the default values",
+    "offers",
+    {},
+    () => ({ view: "templates" })
   ),
   stateTool(
     "read_holidays",
@@ -644,7 +671,7 @@ var ALL_TOOLS = [
   def({
     name: "draft_changes",
     title: "Draft a change set for approval",
-    description: "Draft one change set: a title, a reason and a list of items, each with area, kind, target, after and its own reason. Read the current state first (list_change_areas and the read_* tools). Make one set for each topic, for example one set for 'Roles for Ravi and Neha'. Every item needs a reason. Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal returned. Money, the admin account, executive roles and the settings groups the admin blocked are refused: tell the person to change those in the portal itself. If the portal lists problems, each has a path: fix them and send the set again.",
+    description: "Draft one change set: a title, a reason and a list of items, each with area, kind, target, after and its own reason. Read the current state first (list_change_areas and the read_* tools). Make one set for each topic, for example one set for 'Roles for Ravi and Neha'. Every item needs a reason. Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal returned. Only the admin's key may draft money and offer letters. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and send the set again.",
     scope: "changes:draft",
     write: true,
     input: {

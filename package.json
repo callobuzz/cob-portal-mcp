@@ -1,6 +1,6 @@
 {
 	"name": "cob-portal-mcp",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "MCP server for the Call O Buzz portal: lets an AI agent read tasks and send drafts and comments with a personal API key",
 	"type": "module",
 	"engines": {
