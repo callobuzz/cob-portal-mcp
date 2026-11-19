@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Settings, the HTTP client and the error text. The key goes out only as an Authorization header.
  * It is never put in a URL, an error message or a log line.
  */
-declare const VERSION = "0.6.0";
+declare const VERSION = "0.7.0";
 declare class PortalError extends Error {
     readonly status?: number | undefined;
     constructor(message: string, status?: number | undefined);
@@ -47,7 +47,7 @@ declare function growthPlanPrompt(goal: string, category: string): string;
 /** The text of the write_test_plan prompt: the plan JSON format and the rules for writing it. */
 declare function testPlanPrompt(subject: string): string;
 
-type Scope = "work:read" | "work:draft" | "work:comment" | "checks:read" | "changes:read" | "changes:draft";
+type Scope = "work:read" | "work:draft" | "work:comment" | "checks:read" | "changes:read" | "changes:draft" | "records:read";
 interface ToolContext {
     client: PortalClient;
     me: Me;
