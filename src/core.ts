@@ -71,7 +71,7 @@ export interface Me {
 const HINTS: Record<number, string> = {
 	401: "The portal did not accept the key. It may be wrong, ended or revoked. Make a new key on the portal Profile page, under API keys, and put it in COB_PORTAL_KEY.",
 	403: "This key may not do this. It lacks a scope, or the person lacks the right. Make a new key with the scope on the portal Profile page.",
-	429: "The key made too many calls. Wait a minute, then try again.",
+	429: "The key made too many calls: a key may make api.rate_per_minute calls a minute (60 unless the admin changed it). Wait a minute, then try again.",
 };
 
 function describeDetails(details: unknown): string {
@@ -92,7 +92,11 @@ function describeDetails(details: unknown): string {
 /** The text an agent reads when the portal answers with an error. It keeps the code, the message and every details path. */
 export function errorFromResponse(status: number, body: unknown): PortalError {
 	const err = (body as { error?: { code?: unknown; message?: unknown; details?: unknown } } | null)?.error;
-	const hint = HINTS[status];
+	// An admin-only area or a change that is never drafted: no scope or new key helps, so the scope hint would mislead.
+	const never = err && typeof err === "object" && err.code === "never_in_draft";
+	const hint = never
+		? "No new key or scope changes this: only the admin's key may draft it, or the person changes it in the portal itself."
+		: HINTS[status];
 	let text: string;
 	if (err && typeof err === "object") {
 		const code = typeof err.code === "string" ? err.code : `http_${status}`;

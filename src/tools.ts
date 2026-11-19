@@ -213,6 +213,24 @@ const FLOW =
 
 const NOT_READY = "This part of the portal cannot be changed by draft yet.";
 
+/** The areas only the admin's key may draft (and only the admin approves). Any other key is refused: no scope helps. */
+export const ADMIN_ONLY_AREAS =
+	"offers, access_roles, access_presets, access_holdings, person_access, worktime_rules, people_add, past_days and salary_structures";
+
+/**
+ * What an agent needed in the dress rehearsal (19 Nov 2026) and did not have: the fields a first draft gets wrong, the
+ * shape of a target with a day, the read tool of the shift ids, the call limit and the admin-only areas.
+ */
+const DRAFT_FACTS =
+	" FIELDS: people_add takes fullName, email, type, and optionally jobRole, manager (the id or email of the manager), joinedOn (IST YYYY-MM-DD) and invite." +
+	" After people_add, a people item for that person takes designation, department and grade only (the job role is set by people_add; a later role move is drafted in role_changes)." +
+	" A shift create needs name, breakMin, halfDayMin, fullDayMin, overtimeAfterMin and overtimeRoundMin, all in minutes, and startMin and endMin in minutes from IST midnight unless it has parts." +
+	" A pattern assignment takes patternId, one of personId, managerPersonId or jobRoleId, and startsOn (IST YYYY-MM-DD) or fromJoiningDay: true (one person, also a person added earlier in the same set)." +
+	' TARGETS WITH A DAY: past_days and roster_plans take "<personId>|YYYY-MM-DD"; for a person added earlier in the same set write "$ref:<name>|YYYY-MM-DD". offers takes "person:<id or email>" or "person:$ref:<name>".' +
+	" The shift ids of roster_plans and patterns come from read_shifts." +
+	` ADMIN KEY ONLY: ${ADMIN_ONLY_AREAS}; the pay reads read_pay_runs and read_salary_structures too. Any other key is refused with "Only the admin's key can draft this.": no new key or scope changes that.` +
+	" LIMIT: a key may make api.rate_per_minute calls a minute (60 unless the admin changed it), then waits a minute.";
+
 /** A 404 not_ready from the portal means the area has no draft support yet: say so in plain words. */
 async function readyOr<T>(run: () => Promise<T>): Promise<T> {
 	try {
@@ -252,6 +270,50 @@ function stateTool(
 	});
 }
 
+/** The words of read_settings asked with no filter: the whole list is about 1 MB. */
+export const SETTINGS_FILTER_HINT =
+	"The whole settings list is about 1 MB. Pass a group (for example worktime) or a key prefix in search (for example worktime.pay), or send all: true to read every setting.";
+
+/** read_settings: the settings of one group or key prefix. With no filter it refuses with a hint, unless all is true. */
+function settingsTool(): AnyTool {
+	return def({
+		name: "read_settings",
+		title: "Read portal settings",
+		description:
+			"Read the current settings of the portal, to see what is there before you draft a change (read first, then call draft_changes). " +
+			"Pass a group or a key prefix in search: the whole list is about 1 MB, so a call with no filter is refused unless all is true. " +
+			FLOW,
+		scope: "changes:read",
+		write: false,
+		input: {
+			group: z.string().min(1).optional().describe("Only this settings group, for example attendance or worktime."),
+			search: z
+				.string()
+				.min(1)
+				.optional()
+				.describe("A key prefix or words to find in the setting key or its description, for example worktime.pay."),
+			changed_only: z.boolean().optional().describe("Only settings that differ from the built-in value."),
+			all: z
+				.boolean()
+				.optional()
+				.describe("true reads every setting (about 1 MB). Left out: a group or search is needed."),
+			...paging,
+		},
+		handler: (i, ctx) => {
+			if (!i.group && !i.search && !i.changed_only && i.all !== true) throw new PortalError(SETTINGS_FILTER_HINT);
+			return readyOr(() =>
+				ctx.client.get("/api/v1/state/settings", {
+					group: i.group as string | undefined,
+					q: i.search as string | undefined,
+					changed: i.changed_only ? 1 : undefined,
+					limit: i.limit as number | undefined,
+					cursor: i.cursor as string | undefined,
+				}),
+			);
+		},
+	});
+}
+
 /** A read of people's records. It needs records:read and answers one page. Its inputs are the query names of the area. */
 function recordTool(
 	name: string,
@@ -287,7 +349,7 @@ const draftItem = z
 			.min(1)
 			.optional()
 			.describe(
-				'The id of the row, or the setting key. Left out for create. Copy it from the read tools. May be "$ref:<name>" of an earlier create item of this set where the area lists target in its refs.',
+				'The id of the row, or the setting key. Left out for create. Copy it from the read tools. May be "$ref:<name>" of an earlier create item of this set where the area lists target in its refs; a target with a day takes "$ref:<name>|YYYY-MM-DD", an offer "person:$ref:<name>".',
 			),
 		after: z
 			.unknown()
@@ -467,29 +529,15 @@ export const ALL_TOOLS: AnyTool[] = [
 			"the read_* tools, then call draft_changes. " +
 			FLOW +
 			" Only the admin's key may draft money and offer letters; other keys are refused money, the admin account and executive roles." +
-			" Each area lists its reads: the read areas this key may use, with their query values. people_add, past_days, salary_structures, offers and the four access areas are for the admin's key only." +
-			' Each area also lists refs: the fields that may hold "$ref:<name>" of an earlier create item of the same set, and the area that item must be in.',
+			" Each area lists its reads: the read areas this key may use, with their query values." +
+			' Each area also lists refs: the fields that may hold "$ref:<name>" of an earlier create item of the same set, and the area that item must be in.' +
+			DRAFT_FACTS,
 		scope: "changes:read",
 		write: false,
 		input: {},
 		handler: (_i, ctx) => ctx.client.get("/api/v1/changes/areas"),
 	}),
-	stateTool(
-		"read_settings",
-		"Read portal settings",
-		"settings",
-		"settings",
-		{
-			group: z.string().min(1).optional().describe("Only this settings group, for example attendance."),
-			search: z.string().min(1).optional().describe("Words to find in the setting key or its description."),
-			changed_only: z.boolean().optional().describe("Only settings that differ from the built-in value."),
-		},
-		(i) => ({
-			group: i.group as string | undefined,
-			q: i.search as string | undefined,
-			changed: i.changed_only ? 1 : undefined,
-		}),
-	),
+	settingsTool(),
 	stateTool("read_job_roles", "Read job roles", "job roles with their responsibilities", "job_roles"),
 	stateTool(
 		"read_people",
@@ -892,7 +940,8 @@ export const ALL_TOOLS: AnyTool[] = [
 			"the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and " +
 			"send the set again. A job role move (main or extra roles) is drafted in role_changes, never in people. " +
 			"A department, grade, job role, access role, shift or pattern that does not exist yet is made by an earlier item " +
-			"of the same set. The after shape and its units are in list_change_areas.",
+			"of the same set. The after shape and its units are in list_change_areas." +
+			DRAFT_FACTS,
 		scope: "changes:draft",
 		write: true,
 		input: {

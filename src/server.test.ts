@@ -305,6 +305,41 @@ describe("change tools (M26)", () => {
 		for (const c of calls) expect(c.method).toBe("GET");
 	});
 
+	it("read_settings with no filter is refused with the hint, and all: true reads every setting (dress rehearsal)", async () => {
+		const { client, calls } = await connect(["changes:read"]);
+		const r = await client.callTool({ name: "read_settings", arguments: {} });
+		expect(r.isError).toBe(true);
+		expect(text(r)).toContain("Pass a group");
+		expect(calls).toHaveLength(0);
+		await client.callTool({ name: "read_settings", arguments: { all: true } });
+		await client.callTool({ name: "read_settings", arguments: { search: "worktime.pay" } });
+		expect(calls.map((c) => c.url.pathname)).toEqual(["/api/v1/state/settings", "/api/v1/state/settings"]);
+		expect((calls[1] as Call).url.searchParams.get("q")).toBe("worktime.pay");
+	});
+
+	it("the change tools say what an agent needs: manager, minutes, startsOn or fromJoiningDay, day targets, read_shifts, the limit, the admin-only areas", async () => {
+		const { client } = await connect(["changes:draft", "changes:read"]);
+		const { tools } = await client.listTools();
+		for (const name of ["list_change_areas", "draft_changes"]) {
+			const d = tools.find((t) => t.name === name)?.description ?? "";
+			for (const w of [
+				"manager",
+				"designation, department and grade only",
+				"breakMin, halfDayMin, fullDayMin, overtimeAfterMin and overtimeRoundMin, all in minutes",
+				"fromJoiningDay",
+				"startsOn",
+				"$ref:<name>|YYYY-MM-DD",
+				"read_shifts",
+				"60",
+				"people_add, past_days and salary_structures",
+			]) {
+				expect(d, `${name}: ${w}`).toContain(w);
+			}
+			expect(d).not.toContain("read_roster_plans");
+			expect(d).not.toContain("—");
+		}
+	});
+
 	it("turns a 404 not_ready into plain words", async () => {
 		const { client } = await connect(["changes:read"], () => ({
 			status: 404,
@@ -527,6 +562,22 @@ describe("error mapping", () => {
 		const t = text(await c429.client.callTool({ name: "list_templates", arguments: {} }));
 		expect(t).toContain("rate_limited: Too many.");
 		expect(t).toContain("Wait a minute");
+	});
+
+	it("an admin-only refusal (never_in_draft) never sends the agent to make a new key", async () => {
+		const c = await connect(
+			["changes:draft"],
+			fail(403, { code: "never_in_draft", message: "Only the admin's key can draft this.", details: null }),
+		);
+		const t = text(
+			await c.client.callTool({
+				name: "draft_changes",
+				arguments: { title: "x", reason: "y", items: [{ area: "people_add", kind: "create", after: {}, reason: "z" }] },
+			}),
+		);
+		expect(t).toContain("never_in_draft: Only the admin's key can draft this.");
+		expect(t).not.toContain("lacks a scope");
+		expect(t).toContain("No new key or scope changes this");
 	});
 
 	it("never puts the key in an error text", async () => {
