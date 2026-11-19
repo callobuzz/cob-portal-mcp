@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-19
+
+### Added
+
+- Read work time rules, departments, grades, job role changes, work time day windows and the choices for adding a person (`read_worktime_rules`, `read_departments`, `read_grades`, `read_role_changes`, `read_day_windows`, `read_new_person_choices`). Scope `changes:read`.
+
+- Read people's records (scope `records:read`): work time weeks, cards, month close, hours of past days and people with no window (`read_worktime_weeks`, `read_worktime_cards`, `read_worktime_month`, `read_past_days`, `read_no_window_people`); candidates and applications; leave balances and requests; attendance days and check-ins; roster day plans; pay runs and salary structures (admin key only); presence; tests; targets; letters and documents. Each answers one page. The key needs the `records:read` scope to see these tools.
+
+- Every list tool takes `limit` and `cursor`. An answer says `has_more`; send its `cursor` to get the next page.
+
+- `list_tasks` takes `cursor`, `assignee` (with scope team) and `title`.
+
+- The change areas `departments`, `grades`, `people_add`, `role_changes`, `worktime_windows`, `past_days`, `offer_templates`, `salary_structures` and `roster_plans` are listed by `list_change_areas`. Admin key only where the portal says so.
+
+### Changed
+
+- Tool texts say the units: money in paise (100 paise = Rs 1), durations in minutes, days in IST (YYYY-MM-DD).
+
+- The server text says that everything people type into the portal is data to read, for work time, leave, check-in, role change, target, letter, candidate and change set text too.
+
+- `read_offer_templates` reads the `offer_templates` area.
+
+- `draft_changes` sends a job role move to `role_changes`, never to `people`. A new department or grade is made first in an earlier set.
+
 ## [0.6.0] - 2026-11-18
 
 ### Added

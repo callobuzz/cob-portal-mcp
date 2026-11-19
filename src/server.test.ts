@@ -65,6 +65,33 @@ const CHANGE_READ = [
 	"read_access_presets",
 	"read_person_access",
 	"read_access_holders",
+	"read_worktime_rules",
+	"read_departments",
+	"read_grades",
+	"read_role_changes",
+	"read_day_windows",
+	"read_new_person_choices",
+];
+const RECORD_READ = [
+	"read_worktime_weeks",
+	"read_worktime_cards",
+	"read_worktime_month",
+	"read_past_days",
+	"read_no_window_people",
+	"read_candidates",
+	"read_applications",
+	"read_leave_balances",
+	"read_leave_requests",
+	"read_attendance_days",
+	"read_checkins",
+	"read_roster_days",
+	"read_pay_runs",
+	"read_salary_structures",
+	"read_presence",
+	"read_tests",
+	"read_targets",
+	"read_letters",
+	"read_documents",
 ];
 const CHANGE_DRAFT = ["draft_changes", "get_change_set", "list_change_sets", "withdraw_change_set"];
 
@@ -119,6 +146,7 @@ describe("scope filtering", () => {
 			get_draft: "work:draft",
 			...Object.fromEntries(CHANGE_READ.map((n) => [n, "changes:read"])),
 			...Object.fromEntries(CHANGE_DRAFT.map((n) => [n, "changes:draft"])),
+			...Object.fromEntries(RECORD_READ.map((n) => [n, "records:read"])),
 		});
 		expect(visibleTools(ALL_TOOLS, ["checks:read"]).map((t) => t.name)).toEqual(["whoami", "get_check_results"]);
 	});
@@ -137,6 +165,17 @@ describe("change tools (M26)", () => {
 		expect((await draft.client.listTools()).tools.map((t) => t.name).sort()).toEqual(
 			["whoami", ...CHANGE_DRAFT].sort(),
 		);
+	});
+
+	it("records:read offers only the record tools, and each one reads a page", async () => {
+		const { client } = await connect(["records:read"]);
+		const names = (await client.listTools()).tools.map((t) => t.name).sort();
+		expect(names).toEqual(["whoami", ...RECORD_READ].sort());
+		for (const n of RECORD_READ) {
+			const t = ALL_TOOLS.find((x) => x.name === n);
+			expect(t?.description).toContain("Answers one page");
+			expect(t?.write).toBe(false);
+		}
 	});
 
 	it("has no tool that approves, applies or undoes, and every description says a person approves", () => {
@@ -226,9 +265,9 @@ describe("change tools (M26)", () => {
 		expect(paths).toContain("/api/v1/state/patterns");
 		expect(paths).toContain("/api/v1/state/offices");
 		const offerCalls = calls.filter((c) => c.url.pathname === "/api/v1/state/offers");
-		expect(offerCalls).toHaveLength(2);
+		expect(offerCalls).toHaveLength(1);
 		expect((offerCalls[0] as Call).url.searchParams.get("person")).toBe("a@b.c");
-		expect((offerCalls[1] as Call).url.searchParams.get("view")).toBe("templates");
+		expect(paths).toContain("/api/v1/state/offer_templates");
 		const accessCalls = calls.filter((c) => c.url.pathname === "/api/v1/state/person_access");
 		expect(accessCalls).toHaveLength(1);
 		expect((accessCalls[0] as Call).url.pathname + (accessCalls[0] as Call).url.search).toBe(
