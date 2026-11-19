@@ -213,6 +213,35 @@ describe("change tools (M26)", () => {
 		expect(c.headers["Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
 	});
 
+	it("draft_changes passes ref and $ref: values through as given (one set, in order)", async () => {
+		const { client, calls } = await connect(["changes:draft"], () => ({
+			status: 201,
+			json: { set_id: ID, status: "draft", items: [] },
+		}));
+		const body = {
+			title: "Onboard Asha",
+			reason: "SV asked",
+			items: [
+				{ area: "departments", kind: "create", ref: "ops", after: { name: "Operations" }, reason: "New team" },
+				{ area: "departments", kind: "create", after: { name: "Support", parent: "$ref:ops" }, reason: "Its team" },
+				{ area: "people", kind: "update", target: "$ref:asha", after: { department: "$ref:ops" }, reason: "Her team" },
+			],
+		};
+		const r = await client.callTool({ name: "draft_changes", arguments: body });
+		expect(r.isError).toBeFalsy();
+		expect((calls[0] as Call).body).toEqual(body);
+		const bad = await client.callTool({
+			name: "draft_changes",
+			arguments: {
+				title: "T",
+				reason: "R",
+				items: [{ area: "departments", kind: "create", ref: "1 bad", after: {}, reason: "r" }],
+			},
+		});
+		expect(bad.isError).toBe(true);
+		expect(calls).toHaveLength(1);
+	});
+
 	it("refuses an item with no reason or an unknown area before any call", async () => {
 		const { client, calls } = await connect(["changes:draft"]);
 		const noReason = await client.callTool({

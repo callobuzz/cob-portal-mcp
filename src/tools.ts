@@ -286,13 +286,22 @@ const draftItem = z
 			.string()
 			.min(1)
 			.optional()
-			.describe("The id of the row, or the setting key. Left out for create. Copy it from the read tools."),
+			.describe(
+				'The id of the row, or the setting key. Left out for create. Copy it from the read tools. May be "$ref:<name>" of an earlier create item of this set where the area lists target in its refs.',
+			),
 		after: z
 			.unknown()
 			.describe(
-				"The new value, in the shape list_change_areas shows for this area and kind. For a setting: the value.",
+				'The new value, in the shape list_change_areas shows for this area and kind. For a setting: the value. A field the area lists in its refs may hold "$ref:<name>" of an earlier create item of this set.',
 			),
 		reason: z.string().trim().min(1).describe("Why this change, in one plain sentence. Every item needs one."),
+		ref: z
+			.string()
+			.regex(/^[A-Za-z][A-Za-z0-9_-]{0,39}$/)
+			.optional()
+			.describe(
+				'Only on a create: a short name for what it makes (a letter, then letters, digits, _ or -), unique in the set. Later items of the same set point at it with "$ref:<name>".',
+			),
 	})
 	.strict();
 
@@ -458,7 +467,8 @@ export const ALL_TOOLS: AnyTool[] = [
 			"the read_* tools, then call draft_changes. " +
 			FLOW +
 			" Only the admin's key may draft money and offer letters; other keys are refused money, the admin account and executive roles." +
-			" Each area lists its reads: the read areas this key may use, with their query values. people_add, past_days, salary_structures, offers and the four access areas are for the admin's key only.",
+			" Each area lists its reads: the read areas this key may use, with their query values. people_add, past_days, salary_structures, offers and the four access areas are for the admin's key only." +
+			' Each area also lists refs: the fields that may hold "$ref:<name>" of an earlier create item of the same set, and the area that item must be in.',
 		scope: "changes:read",
 		write: false,
 		input: {},
@@ -862,7 +872,18 @@ export const ALL_TOOLS: AnyTool[] = [
 		description:
 			"Draft one change set: a title, a reason and a list of items, each with area, kind, target, after and its own " +
 			"reason. Read the current state first (list_change_areas and the read_* tools). Make one set for each topic, for " +
-			"example one set for 'Roles for Ravi and Neha'. Every item needs a reason. " +
+			"example one set for 'Roles for Ravi and Neha' or the whole onboarding of one person. Every item needs a reason. " +
+			"ONE SET, IN ORDER: put everything one request needs in one set, even when a later item uses a thing an earlier " +
+			'item makes. Give the create item a ref, and point at it later with "$ref:<name>" in a field list_change_areas ' +
+			"lists in refs (a parent department, a person, a job role, an access role, a pattern, a shift). The item that makes " +
+			"a thing comes first. A natural name works too when nothing live has it (a department path, a shift short code, a " +
+			"new person's email). Example, a department, a child department and a person in one set: " +
+			'[{"area":"departments","kind":"create","ref":"ops","after":{"name":"Operations"},"reason":"New team"}, ' +
+			'{"area":"departments","kind":"create","ref":"support","after":{"name":"Support","parent":"$ref:ops"},"reason":"Its first team"}, ' +
+			'{"area":"people_add","kind":"create","ref":"asha","after":{"fullName":"Asha Rao","email":"asha@example.com","type":"permanent"},"reason":"Joins Monday"}, ' +
+			'{"area":"people","kind":"update","target":"$ref:asha","after":{"department":"$ref:support"},"reason":"Her team"}]. ' +
+			"The person approves each item or all at once; an item never applies before the items it needs. If an item it " +
+			"needs is rejected or fails, it is skipped and get_change_set says why (status skipped). " +
 			"Nothing changes now: the set waits on Changes to review in the portal, where a person approves or rejects each " +
 			"item, and can undo an applied one. Tell the person to open Changes to review, and show them the lines the portal " +
 			"returned. Only the admin's key may draft money and offer letters. Access areas (access_roles, access_presets, " +
@@ -870,8 +891,8 @@ export const ALL_TOOLS: AnyTool[] = [
 			"read_person_access, read_access_presets. Other keys are refused money, the admin account, executive roles and the settings groups the admin blocked: tell " +
 			"the person to change those in the portal itself. An offer letter is drafted as a draft offer: the admin reads it and presses Issue in the portal. If the portal lists problems, each has a path: fix them and " +
 			"send the set again. A job role move (main or extra roles) is drafted in role_changes, never in people. " +
-			"A department or grade that does not exist yet is made first in departments or grades, in an earlier set. " +
-			"The after shape and its units are in list_change_areas.",
+			"A department, grade, job role, access role, shift or pattern that does not exist yet is made by an earlier item " +
+			"of the same set. The after shape and its units are in list_change_areas.",
 		scope: "changes:draft",
 		write: true,
 		input: {

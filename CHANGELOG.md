@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-19
+
+### Added
+
+- One set, in order: a create item of `draft_changes` may carry `ref`, and a later item of the same set points at what it makes with `"$ref:<name>"` (a parent department, a new person, a job role, an access role, a pattern, a shift). A natural name works too when nothing live has it. So the whole onboarding of one person is one set to approve. The `draft_changes` text teaches the pattern with a short example.
+
+- `list_change_areas` says, per area, which fields may hold `"$ref:"` and of which area (`refs`).
+
+### Changed
+
+- An item of a change set may be `skipped`: an item it needs was rejected, failed or was skipped. `get_change_set` gives the reason and the items each item needs (`needs`). Needs portal M32-13.
+
 ## [0.7.0] - 2026-11-19
 
 ### Added

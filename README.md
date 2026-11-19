@@ -78,8 +78,8 @@ The portal's Profile page shows this block with your new key and the portal addr
 
 Notes:
 
-- To stay on one version, add it: `cob-portal-mcp@0.7.0`.
-- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.7.0` for one version).
+- To stay on one version, add it: `cob-portal-mcp@0.8.0`.
+- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.8.0` for one version).
 - To use a folder copy, clone the repository and write `node <path>/dist/cli.js` in place of `npx -y ...`. On Windows write
   the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
 
@@ -187,7 +187,7 @@ You do not write JSON. You ask in plain words, and Claude does the steps:
 
 1. You say: "Give Ravi the extra job role Sales and make Neha his manager. Also set the notice period to 45 days."
 2. Claude reads the current state (`list_change_areas`, `read_people`, `read_settings`). It never guesses.
-3. Claude drafts **one set** with `draft_changes`. Each change has its own reason.
+3. Claude drafts **one set** with `draft_changes`. Each change has its own reason. A thing the request needs that does not exist yet (a new department, a new person, a new access role) is made by an earlier change of the same set, so one request is one set to approve.
 4. The portal answers with the plain lines of each change. Claude shows them to you.
 5. You open **Changes to review** in the portal. You approve or reject each line. You can undo a line you approved.
 6. Claude calls `get_change_set` and tells you what was applied.
