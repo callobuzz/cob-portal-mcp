@@ -106,78 +106,78 @@ If a key stops working, make a new one on the same page.
 
 ## Scopes
 
-| Scope           | What it allows                                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `work:read`     | Read tasks, task templates and task categories.                                                                      |
-| `work:draft`    | Send draft tasks and check lists for approval. Read your draft batches.                                              |
-| `work:comment`  | Write notes on tasks.                                                                                                |
-| `checks:read`   | Read check list results.                                                                                             |
-| `changes:read`  | Read the current portal set-up (settings, job roles, people and their roles, and more). Changes nothing.             |
-| `changes:draft` | Draft change sets for a person to approve. Read, withdraw and list your own sets. Never approves, applies or undoes. |
+| Scope           | What it allows                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `work:read`     | Read tasks, task templates and task categories.                                                                                                                          |
+| `work:draft`    | Send draft tasks and check lists for approval. Read your draft batches.                                                                                                  |
+| `work:comment`  | Write notes on tasks.                                                                                                                                                    |
+| `checks:read`   | Read check list results.                                                                                                                                                 |
+| `changes:read`  | Read the current portal set-up (settings, job roles, people and their roles, and more). Changes nothing.                                                                 |
+| `changes:draft` | Draft change sets for a person to approve. Read, withdraw and list your own sets. Never approves, applies or undoes.                                                     |
 | `records:read`  | Read people's records: work time, hiring, leave, attendance, roster, presence, tests, targets, letters, documents and pay (pay for the admin key only). Changes nothing. |
 
 At start the server calls `GET /api/v1/me` and offers **only the tools whose scope the key has**. `whoami` needs no scope.
 
 ## Tools
 
-| Tool                   | Scope           | What it does                                                                                       |
-| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------- |
-| `whoami`               | none            | Shows the person, the key name, its scopes and its end date.                                       |
-| `list_tasks`           | `work:read`     | Lists tasks (`scope` mine or team, `status`, `limit`, `cursor`, `category`, `parent_id`, `assignee`, `title`). |
-| `get_task`             | `work:read`     | Reads one task with its steps, answers, notes, category, parent and sub-task count.                |
-| `list_templates`       | `work:read`     | Lists the published task templates, with their category.                                           |
-| `list_categories`      | `work:read`     | Lists the task categories the portal offers.                                                       |
-| `get_check_results`    | `checks:read`   | Reads the test runs and skips of a check list task. File names only.                               |
-| `add_comment`          | `work:comment`  | Writes a note on a task.                                                                           |
-| `draft_tasks`          | `work:draft`    | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).        |
-| `draft_checklist`      | `work:draft`    | Sends a test plan (plan JSON) as one draft with a check list.                                      |
-| `list_drafts`          | `work:draft`    | Lists the draft batches you sent.                                                                  |
-| `get_draft`            | `work:draft`    | Reads one draft batch, with the state, category and parent of each draft.                          |
-| `list_change_areas`    | `changes:read`  | Lists the areas you may draft for, the kinds of change and the shape of each value. Call it first. |
-| `read_settings`        | `changes:read`  | Reads settings (`group`, `search`, `changed_only`).                                                |
-| `read_job_roles`       | `changes:read`  | Reads job roles with their responsibilities.                                                       |
-| `read_people`          | `changes:read`  | Reads people: main role, extra roles, responsibilities, designation, manager (`person`, `search`). |
-| `read_rounds`          | `changes:read`  | Reads hiring rounds.                                                                               |
-| `read_leave_types`     | `changes:read`  | Reads leave types.                                                                                 |
-| `read_offers`          | `changes:read`  | Reads offer letters (`person`, `application`, `status`, `search`). Admin key only.                 |
-| `read_offer_templates` | `changes:read`  | Reads the offer letter template: sections, fields, defaults. Admin key only.                       |
-| `read_holidays`        | `changes:read`  | Reads holidays (`year`).                                                                           |
-| `read_shifts`          | `changes:read`  | Reads shifts and shift patterns.                                                                   |
-| `read_checkin_places`  | `changes:read`  | Reads offices and the check-in place settings.                                                     |
-| `read_templates_full`  | `changes:read`  | Reads task templates with their repeats.                                                           |
-| `read_access_roles`    | `changes:read`  | Reads access roles with their permissions and holders. Admin key only.                             |
-| `read_access_presets`  | `changes:read`  | Reads the permissions each job role, designation and department gives. Admin key only.             |
-| `read_person_access`   | `changes:read`  | Reads what one person may do and why (`person`). Admin key only.                                   |
-| `read_access_holders`  | `changes:read`  | Reads who holds one permission (`code`), and where it comes from. Admin key only.                  |
-| `read_worktime_rules`  | `changes:read`  | Reads the work time rules.                                                                         |
-| `read_departments`     | `changes:read`  | Reads departments with their parent, head and status (`status`, `search`).                         |
-| `read_grades`          | `changes:read`  | Reads grades with their rank and salary band (paise). The band shows only to keys with pay access. |
-| `read_role_changes`    | `changes:read`  | Reads job role changes (`person`, `status`) with their before and after values.                    |
-| `read_day_windows`     | `changes:read`  | Reads work time windows per day (`person`, `from`, `to`; IST days, minutes from midnight).         |
-| `read_new_person_choices` | `changes:read` | Reads the employment types, job roles and next code for adding a person. Admin key only.        |
-| `read_worktime_weeks`  | `records:read`  | Reads work time weeks (`week`, `person`): each day's minutes and the week account. One page.       |
-| `read_worktime_cards`  | `records:read`  | Reads work time cards (`id`, `person`, `status`, `kind`, `from`, `to`). One page.                  |
-| `read_worktime_month`  | `records:read`  | Reads work time month close (`month`, `person`), in minutes. One page.                             |
-| `read_past_days`       | `records:read`  | Reads the hours of past days of one person (`person`, `from`, `to`). One page.                     |
-| `read_no_window_people` | `records:read` | Reads people with no work time window (`from`, `to`, `person`). One page.                          |
-| `read_candidates`      | `records:read`  | Reads hiring candidates (`q`, `round`, `status`). One page.                                        |
-| `read_applications`    | `records:read`  | Reads hiring applications (`id`, `person`, `round`, `status`). One page.                            |
-| `read_leave_balances`  | `records:read`  | Reads leave balances in days (`person`, `as_of`). One page.                                        |
-| `read_leave_requests`  | `records:read`  | Reads leave requests (`person`, `status`, `from`, `to`). One page.                                 |
-| `read_attendance_days` | `records:read`  | Reads attendance days of one person (`person`, `from`, `to`). One page.                            |
-| `read_checkins`        | `records:read`  | Reads check-ins without the photo (`person`, `status`, `from`, `to`). One page.                    |
-| `read_roster_days`     | `records:read`  | Reads roster day plans (`person`, `from`, `to`). One page.                                         |
-| `read_pay_runs`        | `records:read`  | Reads pay runs (`id`, `kind`, `status`), money in paise. Admin key only. One page.                 |
-| `read_salary_structures` | `records:read` | Reads salary structures (`person`), money in paise. Admin key only. One page.                     |
-| `read_presence`        | `records:read`  | Reads who is online, or one person's timeline for one day (`person`, `day`).                       |
-| `read_tests`           | `records:read`  | Reads the test library, or who sat which test (`view`, `person`, `status`). One page.              |
-| `read_targets`         | `records:read`  | Reads the targets of one person (`person`).                                                        |
-| `read_letters`         | `records:read`  | Reads letters issued to people (`person`). Titles and status only. One page.                       |
-| `read_documents`       | `records:read`  | Reads the documents of one person (`person`). Names and status only. One page.                     |
-| `draft_changes`        | `changes:draft` | Drafts one change set (title, reason, items). Nothing changes until a person approves it.          |
-| `get_change_set`       | `changes:draft` | Reads one set you drafted, with the lines and status of each item.                                 |
-| `list_change_sets`     | `changes:draft` | Lists the sets you drafted, newest first.                                                          |
-| `withdraw_change_set`  | `changes:draft` | Withdraws a set that still waits for review.                                                       |
+| Tool                      | Scope           | What it does                                                                                                   |
+| ------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
+| `whoami`                  | none            | Shows the person, the key name, its scopes and its end date.                                                   |
+| `list_tasks`              | `work:read`     | Lists tasks (`scope` mine or team, `status`, `limit`, `cursor`, `category`, `parent_id`, `assignee`, `title`). |
+| `get_task`                | `work:read`     | Reads one task with its steps, answers, notes, category, parent and sub-task count.                            |
+| `list_templates`          | `work:read`     | Lists the published task templates, with their category.                                                       |
+| `list_categories`         | `work:read`     | Lists the task categories the portal offers.                                                                   |
+| `get_check_results`       | `checks:read`   | Reads the test runs and skips of a check list task. File names only.                                           |
+| `add_comment`             | `work:comment`  | Writes a note on a task.                                                                                       |
+| `draft_tasks`             | `work:draft`    | Sends a batch of draft tasks. A batch can hold main tasks with their sub-tasks (see below).                    |
+| `draft_checklist`         | `work:draft`    | Sends a test plan (plan JSON) as one draft with a check list.                                                  |
+| `list_drafts`             | `work:draft`    | Lists the draft batches you sent.                                                                              |
+| `get_draft`               | `work:draft`    | Reads one draft batch, with the state, category and parent of each draft.                                      |
+| `list_change_areas`       | `changes:read`  | Lists the areas you may draft for, the kinds of change and the shape of each value. Call it first.             |
+| `read_settings`           | `changes:read`  | Reads settings (`group`, `search`, `changed_only`).                                                            |
+| `read_job_roles`          | `changes:read`  | Reads job roles with their responsibilities.                                                                   |
+| `read_people`             | `changes:read`  | Reads people: main role, extra roles, responsibilities, designation, manager (`person`, `search`).             |
+| `read_rounds`             | `changes:read`  | Reads hiring rounds.                                                                                           |
+| `read_leave_types`        | `changes:read`  | Reads leave types.                                                                                             |
+| `read_offers`             | `changes:read`  | Reads offer letters (`person`, `application`, `status`, `search`). Admin key only.                             |
+| `read_offer_templates`    | `changes:read`  | Reads the offer letter template: sections, fields, defaults. Admin key only.                                   |
+| `read_holidays`           | `changes:read`  | Reads holidays (`year`).                                                                                       |
+| `read_shifts`             | `changes:read`  | Reads shifts and shift patterns.                                                                               |
+| `read_checkin_places`     | `changes:read`  | Reads offices and the check-in place settings.                                                                 |
+| `read_templates_full`     | `changes:read`  | Reads task templates with their repeats.                                                                       |
+| `read_access_roles`       | `changes:read`  | Reads access roles with their permissions and holders. Admin key only.                                         |
+| `read_access_presets`     | `changes:read`  | Reads the permissions each job role, designation and department gives. Admin key only.                         |
+| `read_person_access`      | `changes:read`  | Reads what one person may do and why (`person`). Admin key only.                                               |
+| `read_access_holders`     | `changes:read`  | Reads who holds one permission (`code`), and where it comes from. Admin key only.                              |
+| `read_worktime_rules`     | `changes:read`  | Reads the work time rules.                                                                                     |
+| `read_departments`        | `changes:read`  | Reads departments with their parent, head and status (`status`, `search`).                                     |
+| `read_grades`             | `changes:read`  | Reads grades with their rank and salary band (paise). The band shows only to keys with pay access.             |
+| `read_role_changes`       | `changes:read`  | Reads job role changes (`person`, `status`) with their before and after values.                                |
+| `read_day_windows`        | `changes:read`  | Reads work time windows per day (`person`, `from`, `to`; IST days, minutes from midnight).                     |
+| `read_new_person_choices` | `changes:read`  | Reads the employment types, job roles and next code for adding a person. Admin key only.                       |
+| `read_worktime_weeks`     | `records:read`  | Reads work time weeks (`week`, `person`): each day's minutes and the week account. One page.                   |
+| `read_worktime_cards`     | `records:read`  | Reads work time cards (`id`, `person`, `status`, `kind`, `from`, `to`). One page.                              |
+| `read_worktime_month`     | `records:read`  | Reads work time month close (`month`, `person`), in minutes. One page.                                         |
+| `read_past_days`          | `records:read`  | Reads the hours of past days of one person (`person`, `from`, `to`). One page.                                 |
+| `read_no_window_people`   | `records:read`  | Reads people with no work time window (`from`, `to`, `person`). One page.                                      |
+| `read_candidates`         | `records:read`  | Reads hiring candidates (`q`, `round`, `status`). One page.                                                    |
+| `read_applications`       | `records:read`  | Reads hiring applications (`id`, `person`, `round`, `status`). One page.                                       |
+| `read_leave_balances`     | `records:read`  | Reads leave balances in days (`person`, `as_of`). One page.                                                    |
+| `read_leave_requests`     | `records:read`  | Reads leave requests (`person`, `status`, `from`, `to`). One page.                                             |
+| `read_attendance_days`    | `records:read`  | Reads attendance days of one person (`person`, `from`, `to`). One page.                                        |
+| `read_checkins`           | `records:read`  | Reads check-ins without the photo (`person`, `status`, `from`, `to`). One page.                                |
+| `read_roster_days`        | `records:read`  | Reads roster day plans (`person`, `from`, `to`). One page.                                                     |
+| `read_pay_runs`           | `records:read`  | Reads pay runs (`id`, `kind`, `status`), money in paise. Admin key only. One page.                             |
+| `read_salary_structures`  | `records:read`  | Reads salary structures (`person`), money in paise. Admin key only. One page.                                  |
+| `read_presence`           | `records:read`  | Reads who is online, or one person's timeline for one day (`person`, `day`).                                   |
+| `read_tests`              | `records:read`  | Reads the test library, or who sat which test (`view`, `person`, `status`). One page.                          |
+| `read_targets`            | `records:read`  | Reads the targets of one person (`person`).                                                                    |
+| `read_letters`            | `records:read`  | Reads letters issued to people (`person`). Titles and status only. One page.                                   |
+| `read_documents`          | `records:read`  | Reads the documents of one person (`person`). Names and status only. One page.                                 |
+| `draft_changes`           | `changes:draft` | Drafts one change set (title, reason, items). Nothing changes until a person approves it.                      |
+| `get_change_set`          | `changes:draft` | Reads one set you drafted, with the lines and status of each item.                                             |
+| `list_change_sets`        | `changes:draft` | Lists the sets you drafted, newest first.                                                                      |
+| `withdraw_change_set`     | `changes:draft` | Withdraws a set that still waits for review.                                                                   |
 
 Every POST carries a new `Idempotency-Key` (a UUID for each tool call), so a repeated call does not make a second draft.
 
