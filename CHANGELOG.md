@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-20
+
+Follows the portal's one system (M33): the employment type's pay kind (`marks` or `hours`) is the one trigger of pay.
+
+### Removed
+
+- `read_worktime_weeks` and `read_worktime_month`: the portal removed the work time week, the week account and the month close (read areas `wt_weeks` and `wt_month`).
+- Every text about a work time mode, a start day, a pay basis, a week target or a month close.
+
+### Added
+
+- `read_wallet_hours` (scope `records:read`, read area `wallet_hours`): the day lines of hourly people with their minutes, amount in paise and state, the totals by state and the month invoices (`person`, `from`, `to`, at most 93 days). One page.
+- `read_sandwiches` (scope `records:read`, read area `sandwiches`): absences not informed on time, the sandwich rule (`person`, `state` noted, applied or revoked, `from`, `to`). Metadata only, never the proof file. One page.
+- `list_change_areas` and `draft_changes` explain the one system: a marks person is paid by the day's mark, an hours person by the hour into the wallet; overtime counts only inside an approved overtime window; `past_days` (admin key only) marks a marks person's day present or absent with the hours as evidence, or enters an hours person's paid hours; a key never decides a mark or a card.
+- The `draft_changes` example adds an hourly person: `people_add` with the type `freelancer` and an offer with `employment_type` and `hourly_rate_paise`.
+
+### Changed
+
+- `read_offers` names the offer's `employment_type` and `hourly_rate_paise` (paise per hour, for an hours type; empty for a marks type).
+- `read_new_person_choices`, `read_attendance_days`, `read_past_days`, `read_worktime_cards`, `read_worktime_rules` and `read_day_windows` describe what the portal now holds (pay kind, the one record of a day, day entries, overtime window cards, the late run).
+- The server text names day entry, wallet hours and absence notes as people's text to read as data, and says the pay kind decides pay.
+- `read_settings` examples use `attendance` and `wallet` keys.
+
 ## [0.8.0] - 2026-11-19
 
 ### Added

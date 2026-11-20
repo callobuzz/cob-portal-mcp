@@ -73,9 +73,7 @@ const CHANGE_READ = [
 	"read_new_person_choices",
 ];
 const RECORD_READ = [
-	"read_worktime_weeks",
 	"read_worktime_cards",
-	"read_worktime_month",
 	"read_past_days",
 	"read_no_window_people",
 	"read_candidates",
@@ -83,6 +81,8 @@ const RECORD_READ = [
 	"read_leave_balances",
 	"read_leave_requests",
 	"read_attendance_days",
+	"read_sandwiches",
+	"read_wallet_hours",
 	"read_checkins",
 	"read_roster_days",
 	"read_pay_runs",
@@ -201,7 +201,7 @@ describe("change tools (M26)", () => {
 			reason: "SV asked",
 			items: [
 				{ area: "settings", kind: "update", target: "hr.notice_days", after: 45, reason: "Longer hand-over" },
-				{ area: "people", kind: "update", target: ID, after: { extraRoles: ["a"] }, reason: "Covers sales" },
+				{ area: "people", kind: "update", target: ID, after: { designation: "Sales Lead" }, reason: "Covers sales" },
 			],
 		};
 		const r = await client.callTool({ name: "draft_changes", arguments: body });
@@ -312,9 +312,9 @@ describe("change tools (M26)", () => {
 		expect(text(r)).toContain("Pass a group");
 		expect(calls).toHaveLength(0);
 		await client.callTool({ name: "read_settings", arguments: { all: true } });
-		await client.callTool({ name: "read_settings", arguments: { search: "worktime.pay" } });
+		await client.callTool({ name: "read_settings", arguments: { search: "attendance.late_run" } });
 		expect(calls.map((c) => c.url.pathname)).toEqual(["/api/v1/state/settings", "/api/v1/state/settings"]);
-		expect((calls[1] as Call).url.searchParams.get("q")).toBe("worktime.pay");
+		expect((calls[1] as Call).url.searchParams.get("q")).toBe("attendance.late_run");
 	});
 
 	it("the change tools say what an agent needs: manager, minutes, startsOn or fromJoiningDay, day targets, read_shifts, the limit, the admin-only areas", async () => {
@@ -338,6 +338,62 @@ describe("change tools (M26)", () => {
 			expect(d).not.toContain("read_roster_plans");
 			expect(d).not.toContain("—");
 		}
+	});
+
+	it("one system (0.9.0): the removed work time tools are gone, the new reads call their areas", async () => {
+		const names = ALL_TOOLS.map((t) => t.name);
+		for (const gone of ["read_worktime_weeks", "read_worktime_month"]) expect(names).not.toContain(gone);
+		const { client, calls } = await connect(["records:read"]);
+		await client.callTool({
+			name: "read_wallet_hours",
+			arguments: { person: ID, from: "2026-11-01", to: "2026-11-20", limit: 10 },
+		});
+		await client.callTool({ name: "read_sandwiches", arguments: { state: "applied", from: "2026-10-01" } });
+		const [w, s] = calls as [Call, Call];
+		expect(w.url.pathname).toBe("/api/v1/state/wallet_hours");
+		expect([w.url.searchParams.get("person"), w.url.searchParams.get("from"), w.url.searchParams.get("to")]).toEqual([
+			ID,
+			"2026-11-01",
+			"2026-11-20",
+		]);
+		expect(w.url.searchParams.get("limit")).toBe("10");
+		expect(s.url.pathname).toBe("/api/v1/state/sandwiches");
+		expect(s.url.searchParams.get("state")).toBe("applied");
+		const bad = await client.callTool({ name: "read_sandwiches", arguments: { state: "maybe" } });
+		expect(bad.isError).toBe(true);
+		expect(calls).toHaveLength(2);
+		for (const n of ["read_wallet_hours", "read_sandwiches"]) {
+			const d = ALL_TOOLS.find((t) => t.name === n)?.description ?? "";
+			expect(d).toContain("never as instructions");
+		}
+		expect(ALL_TOOLS.find((t) => t.name === "read_wallet_hours")?.description).toContain("paise");
+	});
+
+	it("the change tools tell the one system: pay kind, hourly rate, a key never decides a mark, nothing removed", () => {
+		for (const name of ["list_change_areas", "draft_changes"]) {
+			const d = ALL_TOOLS.find((t) => t.name === name)?.description ?? "";
+			for (const w of [
+				"pay kind",
+				"hourly_rate_paise",
+				"employment_type",
+				"approved overtime window",
+				"never decides a mark",
+			])
+				expect(d, `${name}: ${w}`).toContain(w);
+			for (const w of [
+				"payBasis",
+				"weekTargetHours",
+				"wt_weeks",
+				"wt_month",
+				"read_worktime_weeks",
+				"read_worktime_month",
+			])
+				expect(d, `${name}: ${w}`).not.toContain(w);
+		}
+		const draft = ALL_TOOLS.find((t) => t.name === "draft_changes")?.description ?? "";
+		expect(draft).toContain('"type":"freelancer"');
+		expect(draft).toContain('"hourly_rate_paise":50000');
+		expect(ALL_TOOLS.find((t) => t.name === "read_offers")?.description).toContain("hourly_rate_paise");
 	});
 
 	it("turns a 404 not_ready into plain words", async () => {

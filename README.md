@@ -78,8 +78,8 @@ The portal's Profile page shows this block with your new key and the portal addr
 
 Notes:
 
-- To stay on one version, add it: `cob-portal-mcp@0.8.0`.
-- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.8.0` for one version).
+- To stay on one version, add it: `cob-portal-mcp@0.9.0`.
+- To run it straight from GitHub instead of npm, use `github:callobuzz/cob-portal-mcp` (or `#v0.9.0` for one version).
 - To use a folder copy, clone the repository and write `node <path>/dist/cli.js` in place of `npx -y ...`. On Windows write
   the path with forward slashes, for example `J:/callobuzz/mcp-servers/cob-portal-mcp/dist/cli.js`.
 
@@ -139,7 +139,7 @@ At start the server calls `GET /api/v1/me` and offers **only the tools whose sco
 | `read_people`             | `changes:read`  | Reads people: main role, extra roles, responsibilities, designation, manager (`person`, `search`).             |
 | `read_rounds`             | `changes:read`  | Reads hiring rounds.                                                                                           |
 | `read_leave_types`        | `changes:read`  | Reads leave types.                                                                                             |
-| `read_offers`             | `changes:read`  | Reads offer letters (`person`, `application`, `status`, `search`). Admin key only.                             |
+| `read_offers`             | `changes:read`  | Reads offer letters (`person`, `application`, `status`, `search`), hourly rate in paise. Admin key only.       |
 | `read_offer_templates`    | `changes:read`  | Reads the offer letter template: sections, fields, defaults. Admin key only.                                   |
 | `read_holidays`           | `changes:read`  | Reads holidays (`year`).                                                                                       |
 | `read_shifts`             | `changes:read`  | Reads shifts and shift patterns.                                                                               |
@@ -149,22 +149,22 @@ At start the server calls `GET /api/v1/me` and offers **only the tools whose sco
 | `read_access_presets`     | `changes:read`  | Reads the permissions each job role, designation and department gives. Admin key only.                         |
 | `read_person_access`      | `changes:read`  | Reads what one person may do and why (`person`). Admin key only.                                               |
 | `read_access_holders`     | `changes:read`  | Reads who holds one permission (`code`), and where it comes from. Admin key only.                              |
-| `read_worktime_rules`     | `changes:read`  | Reads the work time rules.                                                                                     |
+| `read_worktime_rules`     | `changes:read`  | Reads the work time switches the admin set per person (unanswered cards, window kind). Admin key only.         |
 | `read_departments`        | `changes:read`  | Reads departments with their parent, head and status (`status`, `search`).                                     |
 | `read_grades`             | `changes:read`  | Reads grades with their rank and salary band (paise). The band shows only to keys with pay access.             |
 | `read_role_changes`       | `changes:read`  | Reads job role changes (`person`, `status`) with their before and after values.                                |
-| `read_day_windows`        | `changes:read`  | Reads work time windows per day (`person`, `from`, `to`; IST days, minutes from midnight).                     |
-| `read_new_person_choices` | `changes:read`  | Reads the employment types, job roles and next code for adding a person. Admin key only.                       |
-| `read_worktime_weeks`     | `records:read`  | Reads work time weeks (`week`, `person`): each day's minutes and the week account. One page.                   |
-| `read_worktime_cards`     | `records:read`  | Reads work time cards (`id`, `person`, `status`, `kind`, `from`, `to`). One page.                              |
-| `read_worktime_month`     | `records:read`  | Reads work time month close (`month`, `person`), in minutes. One page.                                         |
-| `read_past_days`          | `records:read`  | Reads the hours of past days of one person (`person`, `from`, `to`). One page.                                 |
+| `read_day_windows`        | `changes:read`  | Reads the work time window of each day (`person`, `from`, `to`; IST days, minutes from midnight).              |
+| `read_new_person_choices` | `changes:read`  | Reads the employment types (pay kind marks or hours), job roles and next code. Admin key only.                 |
+| `read_worktime_cards`     | `records:read`  | Reads work time cards: overtime windows, late runs, corrections (`id`, `person`, `status`, `kind`, ...).       |
+| `read_past_days`          | `records:read`  | Reads the hours entered for days of one person (`person`, `from`, `to`). One page.                             |
 | `read_no_window_people`   | `records:read`  | Reads people with no work time window (`from`, `to`, `person`). One page.                                      |
 | `read_candidates`         | `records:read`  | Reads hiring candidates (`q`, `round`, `status`). One page.                                                    |
 | `read_applications`       | `records:read`  | Reads hiring applications (`id`, `person`, `round`, `status`). One page.                                       |
 | `read_leave_balances`     | `records:read`  | Reads leave balances in days (`person`, `as_of`). One page.                                                    |
 | `read_leave_requests`     | `records:read`  | Reads leave requests (`person`, `status`, `from`, `to`). One page.                                             |
-| `read_attendance_days`    | `records:read`  | Reads attendance days of one person (`person`, `from`, `to`). One page.                                        |
+| `read_attendance_days`    | `records:read`  | Reads the one record of each day of one person: mark or hours (`person`, `from`, `to`). One page.              |
+| `read_sandwiches`         | `records:read`  | Reads absences not informed on time, the sandwich rule (`person`, `state`, `from`, `to`). One page.            |
+| `read_wallet_hours`       | `records:read`  | Reads the hours of hourly people, paid into the wallet (`person`, `from`, `to`), paise. One page.              |
 | `read_checkins`           | `records:read`  | Reads check-ins without the photo (`person`, `status`, `from`, `to`). One page.                                |
 | `read_roster_days`        | `records:read`  | Reads roster day plans (`person`, `from`, `to`). One page.                                                     |
 | `read_pay_runs`           | `records:read`  | Reads pay runs (`id`, `kind`, `status`), money in paise. Admin key only. One page.                             |
@@ -195,6 +195,10 @@ You do not write JSON. You ask in plain words, and Claude does the steps:
 Nothing changes until you approve in the portal. Only the admin's key may draft money and offer letters. Other keys are refused money, the admin account and executive roles, so
 change those in the portal itself. If a part of the portal cannot be drafted yet, Claude says:
 "This part of the portal cannot be changed by draft yet."
+
+The employment type decides how a person is paid: its pay kind is `marks` (paid by the mark of each day) or `hours` (paid
+by the hour into the wallet). An offer for an hours type carries `hourly_rate_paise`. A key never decides a mark: the admin's
+key may draft a day in `past_days`, and the day is marked only when the admin approves it.
 
 ### A main task with sub-tasks
 
