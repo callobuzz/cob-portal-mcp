@@ -70,6 +70,7 @@ const CHANGE_READ = [
 	"read_grades",
 	"read_role_changes",
 	"read_day_windows",
+	"read_employment_types",
 	"read_new_person_choices",
 ];
 const RECORD_READ = [
@@ -394,6 +395,48 @@ describe("change tools (M26)", () => {
 		expect(draft).toContain('"type":"freelancer"');
 		expect(draft).toContain('"hourly_rate_paise":50000');
 		expect(ALL_TOOLS.find((t) => t.name === "read_offers")?.description).toContain("hourly_rate_paise");
+		expect(draft).toContain("Choose the type by its payKind");
+		const choices = ALL_TOOLS.find((t) => t.name === "read_new_person_choices")?.description ?? "";
+		for (const w of ["payKind", "payKindMeans"]) expect(choices).toContain(w);
+		for (const name of ["list_change_areas", "draft_changes"]) {
+			const d = ALL_TOOLS.find((t) => t.name === name)?.description ?? "";
+			for (const w of ["employment_types", "read_employment_types", "sortOrder", "approve the type first"])
+				expect(d, `${name}: ${w}`).toContain(w);
+		}
+	});
+
+	it("employment_types (0.9.0): a draft area, admin key only, read by read_employment_types", async () => {
+		const { client, calls } = await connect(["changes:read", "changes:draft"], () => ({
+			status: 201,
+			json: { set_id: ID, status: "draft", items: [] },
+		}));
+		await client.callTool({ name: "read_employment_types", arguments: {} });
+		expect((calls[0] as Call).url.pathname).toBe("/api/v1/state/employment_types");
+		const body = {
+			title: "Hourly contract type",
+			reason: "SV asked",
+			items: [
+				{
+					area: "employment_types",
+					kind: "create",
+					after: { key: "contract_hourly", name: "Contract (hourly)", payKind: "hours", wallet: true },
+					reason: "Paid by the hour",
+				},
+				{
+					area: "employment_types",
+					kind: "update",
+					target: "intern",
+					after: { payKind: "hours" },
+					reason: "By the hour",
+				},
+				{ area: "employment_types", kind: "archive", target: "contract", after: {}, reason: "Not used" },
+			],
+		};
+		const r = await client.callTool({ name: "draft_changes", arguments: body });
+		expect(r.isError).toBeFalsy();
+		expect((calls[1] as Call).body).toEqual(body);
+		const t = ALL_TOOLS.find((x) => x.name === "draft_changes")?.description ?? "";
+		expect(t).toContain("employment_types, people_add, past_days and salary_structures");
 	});
 
 	it("turns a 404 not_ready into plain words", async () => {

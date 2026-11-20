@@ -198,6 +198,7 @@ const AREAS = [
 	"offer_templates",
 	"salary_structures",
 	"roster_plans",
+	"employment_types",
 ] as const;
 
 /** The words every change tool tells the model. Nothing changes until a person approves the set in the portal. */
@@ -209,14 +210,15 @@ const NOT_READY = "This part of the portal cannot be changed by draft yet.";
 
 /** The areas only the admin's key may draft (and only the admin approves). Any other key is refused: no scope helps. */
 export const ADMIN_ONLY_AREAS =
-	"offers, access_roles, access_presets, access_holdings, person_access, worktime_rules, people_add, past_days and salary_structures";
+	"offers, access_roles, access_presets, access_holdings, person_access, worktime_rules, employment_types, people_add, past_days and salary_structures";
 
 /**
  * The one system of the portal (M33): the employment type's pay kind is the one trigger. There is no work time mode, no
  * start day, no pay basis, no week target and no month close.
  */
 export const ONE_SYSTEM =
-	" ONE SYSTEM: the employment type decides how a person is paid; its pay kind is marks or hours (read_new_person_choices lists the types; freelancer is hours by default)." +
+	" ONE SYSTEM: the employment type decides how a person is paid; its pay kind is marks or hours. Choose the type by its payKind: read_new_person_choices gives each type with payKind and payKindMeans (freelancer is hours by default)." +
+	" employment_types (admin key only) creates, changes or archives a type: key, name, payKind, sortOrder and the switches wallet, checkin, shift, leave, payroll, overtime and probation; target the type key. A payKind change moves every person who holds the type (the line says how many). people_add takes no $ref to a new type: approve the type first, then add the person in a later set. read_employment_types reads the types." +
 	" A permanent (marks) person is paid by the mark of each day (P, A, HD, WO, H or a leave code); hours never cut the salary. An hourly (hours) person has no marks and is paid by the hour into the wallet (read_wallet_hours)." +
 	" Overtime and work on an off day count only inside an approved overtime window (a work time card of kind extra_window, decided in the portal)." +
 	" A day is entered by draft only in past_days (admin key only, any day up to today, target <personId>|YYYY-MM-DD): kind present with minutes (or inAt and outAt) or kind absent, and a note." +
@@ -725,9 +727,15 @@ export const ALL_TOOLS: AnyTool[] = [
 		}),
 	),
 	stateTool(
+		"read_employment_types",
+		"Read employment types",
+		"employment types: key, name, payKind (marks: paid by the day's mark with a monthly salary; hours: paid by the hour into the wallet), sortOrder, the switches (wallet, checkin, shift, leave, payroll, overtime, probation), whether archived, and how many people hold each. Only the admin's key can read them",
+		"employment_types",
+	),
+	stateTool(
 		"read_new_person_choices",
 		"Read choices for adding a person",
-		"choices for adding a person: employment types (the key goes in people_add type; the type's pay kind, marks or hours, decides whether the person is paid by the day's mark or by the hour; freelancer is hours by default), job roles, the invite setting and the next employee code",
+		"choices for adding a person: employment types, each with key (it goes in people_add type), name, payKind (marks: paid by the day's mark, a monthly salary; hours: paid by the hour into the wallet) and payKindMeans (that rule in plain words), so choose the type by its pay kind; job roles, the invite setting and the next employee code",
 		"people_add",
 	),
 	recordTool(
@@ -949,7 +957,7 @@ export const ALL_TOOLS: AnyTool[] = [
 			'{"area":"departments","kind":"create","ref":"support","after":{"name":"Support","parent":"$ref:ops"},"reason":"Its first team"}, ' +
 			'{"area":"people_add","kind":"create","ref":"asha","after":{"fullName":"Asha Rao","email":"asha@example.com","type":"permanent"},"reason":"Joins Monday"}, ' +
 			'{"area":"people","kind":"update","target":"$ref:asha","after":{"department":"$ref:support"},"reason":"Her team"}]. ' +
-			"For an hourly person (a type whose pay kind is hours), add the person and an offer with the hourly rate in the same set: " +
+			"Choose the type by its payKind in read_new_person_choices: asha takes a type with payKind marks (permanent). For an hourly person take a type with payKind hours (freelancer by default), and add the person and an offer with the hourly rate in the same set: " +
 			'[{"area":"people_add","kind":"create","ref":"ravi","after":{"fullName":"Ravi Kumar","email":"ravi@example.com","type":"freelancer"},"reason":"Works by the hour"}, ' +
 			'{"area":"offers","kind":"create","target":"person:$ref:ravi","after":{"fields":{"employment_type":"freelancer","hourly_rate_paise":50000}},"reason":"Rs 500 an hour"}] (offers: admin key only). ' +
 			"The person approves each item or all at once; an item never applies before the items it needs. If an item it " +

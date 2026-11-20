@@ -154,7 +154,8 @@ At start the server calls `GET /api/v1/me` and offers **only the tools whose sco
 | `read_grades`             | `changes:read`  | Reads grades with their rank and salary band (paise). The band shows only to keys with pay access.             |
 | `read_role_changes`       | `changes:read`  | Reads job role changes (`person`, `status`) with their before and after values.                                |
 | `read_day_windows`        | `changes:read`  | Reads the work time window of each day (`person`, `from`, `to`; IST days, minutes from midnight).              |
-| `read_new_person_choices` | `changes:read`  | Reads the employment types (pay kind marks or hours), job roles and next code. Admin key only.                 |
+| `read_employment_types`   | `changes:read`  | Reads employment types: pay kind (marks or hours), switches, holders. Admin key only.                          |
+| `read_new_person_choices` | `changes:read`  | Reads the types for adding a person (`payKind`, `payKindMeans`), job roles, next code. Admin key only.         |
 | `read_worktime_cards`     | `records:read`  | Reads work time cards: overtime windows, late runs, corrections (`id`, `person`, `status`, `kind`, ...).       |
 | `read_past_days`          | `records:read`  | Reads the hours entered for days of one person (`person`, `from`, `to`). One page.                             |
 | `read_no_window_people`   | `records:read`  | Reads people with no work time window (`from`, `to`, `person`). One page.                                      |
@@ -197,7 +198,7 @@ change those in the portal itself. If a part of the portal cannot be drafted yet
 "This part of the portal cannot be changed by draft yet."
 
 The employment type decides how a person is paid: its pay kind is `marks` (paid by the mark of each day) or `hours` (paid
-by the hour into the wallet). An offer for an hours type carries `hourly_rate_paise`. A key never decides a mark: the admin's
+by the hour into the wallet). An offer for an hours type carries `hourly_rate_paise`. The admin's key may draft a type and its pay kind in `employment_types`. A key never decides a mark: the admin's
 key may draft a day in `past_days`, and the day is marked only when the admin approves it.
 
 ### A main task with sub-tasks

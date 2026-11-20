@@ -156,7 +156,7 @@ Change wanted: ${what || "(what the person asked for, in their own words)"}
 
 1. Read first. Call list_change_areas to see the areas and the shape of each change. Then call the read_* tools for the
    areas you touch (read_settings, read_job_roles, read_people, read_rounds, read_leave_types, read_leave_policies, read_offers, read_offer_templates, read_holidays, read_shifts,
-   read_checkin_places, read_templates_full, read_access_roles, read_access_presets, read_person_access, read_access_holders). Never guess an id, a setting key or a current value.
+   read_checkin_places, read_templates_full, read_access_roles, read_access_presets, read_person_access, read_access_holders, read_employment_types). Never guess an id, a setting key or a current value.
 2. Draft one set for each topic. Call draft_changes with a title, a reason and the items. Each item has an area, a kind,
    a target (the id or setting key, none for a create), the new value in after, and its own reason.
    For a person (area people), send one item for each part, so the reviewer can approve each part alone: the designation,
